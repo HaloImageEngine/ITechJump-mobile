@@ -1,0 +1,102 @@
+<nav class="nav">
+  <!-- Hamburger for mobile -->
+  <button
+    class="hamburger"
+    (click)="toggleMenu()"
+    aria-label="Toggle navigation menu"
+    type="button"
+  >
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Desktop + Mobile links -->
+  <ul class="nav-links" [class.open]="menuOpen()">
+    <li
+      *ngFor="let item of navItems"
+      class="nav-item"
+      [class.has-children]="item.children?.length"
+    >
+      <!-- Regular link (no children) -->
+      <ng-container
+        *ngIf="!item.children || !item.children.length; else dropdownTemplate"
+      >
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+          (click)="closeMenu()"
+        >
+          {{ item.label }}
+        </a>
+      </ng-container>
+
+      <!-- Items with submenu (Testing, Register, About) -->
+      <ng-template #dropdownTemplate>
+        <a
+          href=""
+          class="nav-link has-dropdown"
+          (click)="toggleDropdown(item.label); $event.preventDefault()"
+          [attr.aria-expanded]="isDropdownOpen(item.label)"
+        >
+          {{ item.label }}
+          <span class="caret" [class.open]="isDropdownOpen(item.label)">▾</span>
+        </a>
+
+        <!-- Submenu always in DOM; CSS + isDropdownOpen(label) control visibility -->
+        <ul class="submenu" [class.open]="isDropdownOpen(item.label)">
+          <li *ngFor="let child of item.children">
+            <!-- Regular submenu items -->
+            <a
+              *ngIf="child.label !== 'Version' && !child.label.startsWith('Version'); else versionItem"
+              [routerLink]="child.route"
+              (click)="handleSubItemClick()"
+              [title]="child.title || child.label"
+            >
+              {{ child.label }}
+            </a>
+
+            <!-- Version submenu item: opens popup -->
+            <ng-template #versionItem>
+              <button
+                type="button"
+                class="submenu-btn"
+                (click)="openVersion()"
+                [title]="child.title || child.label"
+              >
+                {{ child.label }}
+              </button>
+            </ng-template>
+          </li>
+        </ul>
+      </ng-template>
+    </li>
+  </ul>
+</nav>
+
+<!-- Backdrop for mobile menu -->
+<div
+  class="nav-backdrop"
+  *ngIf="menuOpen()"
+  (click)="closeMenu()"
+></div>
+
+<!-- Version popup -->
+<div
+  class="version-backdrop"
+  *ngIf="showVersion()"
+  (click)="closeVersion()"
+>
+  <div class="version-modal" (click)="$event.stopPropagation()">
+    <div class="version-body">
+      <p class="version-line">Version {{ version }}</p>
+      <p class="version-line">Written by : WDBeaty</p>
+    </div>
+    <button
+      type="button"
+      class="version-close"
+      (click)="closeVersion()"
+    >
+      Close
+    </button>
+  </div>
+</div>

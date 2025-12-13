@@ -1,0 +1,91 @@
+<div class="main-page">
+  <h1 class="page-title">
+    <span class="title">ITech<span class="logo-j">J</span>ump Question Search</span>
+  </h1>
+  <p class="page-subtitle">
+    Type a keyword (e.g., OOP, SDLC, Design) to search for questions, then pick one and reveal the model answer.
+  </p>
+
+  <div *ngIf="error()" class="error-box">
+    {{ error() }}
+  </div>
+
+  <!-- Search textbox (replaces category dropdown) -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Search by Keyword</mat-label>
+    <input
+      matInput
+      placeholder="Type a Search (e.g., OOP, SDLC, Design)"
+      [disabled]="loadingQuestions()"
+      [value]="searchText()"
+      (input)="onSearchTextChange($any($event.target).value)"
+      (keyup.enter)="onSearch()"
+    />
+  </mat-form-field>
+
+  <div class="button-row">
+    <button
+      mat-raised-button
+      class="show-answer-btn"
+      (click)="onSearch()"
+      [disabled]="loadingQuestions() || !searchText().trim()"
+    >
+      Search
+    </button>
+  </div>
+
+  <!-- Questions dropdown -->
+  <mat-form-field
+    *ngIf="questions().length"
+    appearance="outline"
+    class="full-width"
+  >
+    <mat-label>Questions</mat-label>
+    <mat-select
+      [disabled]="loadingQuestions() || !questions().length"
+      [value]="selectedQuestionId()"
+      (selectionChange)="onSelectQuestion($event.value)"
+    >
+      <mat-option *ngFor="let q of questions()" [value]="q.ID">
+        {{ getQuestionPreview(q) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Full question textbox -->
+  <mat-form-field
+    *ngIf="selectedQuestion()"
+    appearance="outline"
+    class="full-width"
+  >
+    <mat-label>Full Question</mat-label>
+    <textarea
+      matInput
+      [value]="selectedQuestion()?.Question"
+      rows="5"
+      readonly
+    ></textarea>
+  </mat-form-field>
+
+  <!-- Show Answer button -->
+  <div class="button-row" *ngIf="selectedQuestion()">
+    <button mat-raised-button class="show-answer-btn" (click)="onShowAnswer()">
+      Show Answer
+    </button>
+  </div>
+
+  <!-- Answer textbox -->
+  <mat-form-field
+    *ngIf="selectedQuestion() && showAnswer()"
+    appearance="outline"
+    class="full-width answer-box"
+  >
+    <mat-label>Model Answer</mat-label>
+    <textarea
+      matInput
+      [value]="selectedQuestion()?.Answer"
+      rows="10"
+      readonly
+    ></textarea>
+  </mat-form-field>
+</div>

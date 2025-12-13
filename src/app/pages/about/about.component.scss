@@ -1,0 +1,333 @@
+/* Base layout (from your guideline) */
+.main-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: #eceff4;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 1.3rem;
+  margin: 4px 0;
+  font-weight: bold;
+  color: #1e3a5f;
+
+  .logo-i,
+  .logo-j {
+    color: #fa0996;
+    font-weight: bold;
+  }
+}
+
+.page-subtitle {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.full-width {
+  width: 100%;
+
+  // Keep textareas white
+  textarea {
+    background-color: #ffffff;
+  }
+}
+
+/* Ensure Material form fields have white backgrounds if any appear */
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff;
+    }
+  }
+}
+
+/* About-specific styles */
+
+.about-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title-badge {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #1e3a5f;
+  color: #f9fafb;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Cards / sections */
+
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  border: 1px solid #dde3ed;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.intro-card {
+  margin-top: 4px;
+}
+
+.bullet-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.bullet-list li + li {
+  margin-top: 2px;
+}
+
+/* Grid layout for feature sections */
+
+.section-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.feature-block + .feature-block {
+  margin-top: 10px;
+}
+
+.feature-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pill-tag {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: #e5e7eb;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mini-list {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.mini-list li + li {
+  margin-top: 2px;
+}
+
+.note {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Plans / pricing section */
+
+.plans-card {
+  margin-top: 4px;
+}
+
+/* Flexible grid: 2–4 cards depending on width */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Base plan card */
+.plan-card {
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.plan-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.plan-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-badge {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.plan-badge.primary {
+  background: #1d4ed8;
+  color: #eff6ff;
+}
+
+.plan-price {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.plan-amount {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.plan-period {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-left: 2px;
+}
+
+.feature-list {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.feature-list li + li {
+  margin-top: 2px;
+}
+
+.cta-button {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: none;
+  background: #1e3a5f;
+  color: #f9fafb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  opacity: 0.96;
+}
+
+/* Individual plan coloring */
+
+.plan-card--free {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.plan-card--basic {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+
+  .plan-amount {
+    color: #15803d;
+  }
+}
+
+.plan-card--pro {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+
+  .plan-amount {
+    color: #6d28d9;
+  }
+}
+
+.plan-card--basiclt {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+
+  .plan-amount {
+    color: #0f766e;
+  }
+}
+
+.plan-card--proyear {
+  background: #fffbeb;
+  border-color: #fed7aa;
+
+  .plan-amount {
+    color: #b45309;
+  }
+}
+
+.future-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Contact hint */
+
+.contact-hint {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+/* Responsive tweaks */
+
+@media (max-width: 900px) {
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-page {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+}

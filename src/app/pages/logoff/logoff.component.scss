@@ -1,0 +1,248 @@
+/* Base layout (matching about page) */
+.main-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: #eceff4;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 1.3rem;
+  margin: 4px 0;
+  font-weight: bold;
+  color: #1e3a5f;
+
+  .logo-i,
+  .logo-j {
+    color: #fa0996;
+    font-weight: bold;
+  }
+}
+
+.title-badge {
+  display: inline-block;
+  background: #fa0996;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.logout-message {
+  font-size: 1rem;
+  color: #1e3a5f;
+  padding: 8px 0;
+}
+
+/* Cards */
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 1.15rem;
+  margin: 0 0 12px;
+  color: #1e3a5f;
+  font-weight: 700;
+}
+
+/* Lists */
+.bullet-list {
+  margin: 12px 0;
+  padding-left: 20px;
+
+  li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+}
+
+.mini-list {
+  margin: 8px 0;
+  padding-left: 20px;
+  font-size: 0.9rem;
+
+  li {
+    margin-bottom: 6px;
+  }
+}
+
+/* Feature blocks */
+.feature-block {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.feature-title {
+  font-size: 1rem;
+  margin: 0 0 8px;
+  color: #1e3a5f;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill-tag {
+  display: inline-block;
+  background: #87ceeb;
+  color: #1e3a5f;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Section grid */
+.section-grid {
+  display: grid;
+  gap: 12px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Plan cards */
+.plan-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+.plan-card {
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  padding: 16px;
+
+  &--basic {
+    border-color: #87ceeb;
+  }
+
+  &--proyear {
+    border-color: #fa0996;
+    background: #fff5f9;
+  }
+}
+
+.plan-header {
+  margin-bottom: 12px;
+}
+
+.plan-title {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+  color: #1e3a5f;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.plan-badge {
+  display: inline-block;
+  background: #dee2e6;
+  color: #495057;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.primary {
+    background: #fa0996;
+    color: white;
+  }
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.plan-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.plan-period {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+
+  li {
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+
+    &:before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #19d38b;
+      font-weight: bold;
+    }
+  }
+}
+
+.cta-button {
+  display: inline-block;
+  background: #fa0996;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(250, 9, 150, 0.3);
+  }
+}
+
+/* Contact hint */
+.contact-hint {
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.link-primary {
+  color: #fa0996;
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

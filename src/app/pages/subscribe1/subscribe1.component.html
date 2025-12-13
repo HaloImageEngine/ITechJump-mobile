@@ -1,0 +1,145 @@
+<!-- src/app/subscribe1/subscribe1.component.html -->
+
+<div class="main-page subscribe-page">
+  <mat-card class="subscribe-card">
+    <!-- Header: alias or register link -->
+    <div class="header-block">
+      <div class="alias-row">
+        <ng-container *ngIf="hasRealAlias; else registerFirst">
+          <h2 class="alias-text">
+            {{ alias }}
+          </h2>
+        </ng-container>
+        <ng-template #registerFirst>
+          <h2 class="alias-text register-link">
+            <a routerLink="/register" (click)="goToRegister()">
+              Let’s Register First
+            </a>
+          </h2>
+        </ng-template>
+      </div>
+
+      <h1 class="page-title">
+        <span class="logo-i">ITech</span><span class="logo-j">Jump</span> Subscription Plans
+      </h1>
+
+      <p class="page-subtitle">
+        Choose a plan to save your answers, track scores, unlock voice mode, and access bonus content.
+      </p>
+    </div>
+
+    <!-- Why subscribe text -->
+    <section class="why-section">
+      <h3>Why subscribe and save your answers?</h3>
+      <p>
+        With a paid ITechJump plan, you can save your answers and scores over time, see how you improve,
+        and target the categories where you need the most practice.
+      </p>
+      <p>
+        Basic plans unlock saving and bonus questions. Pro plans add advanced analytics, voice mode,
+        and expanded bonus content tailored to real-world interviews.
+      </p>
+      <p>
+        The Free plan still lets you practice the core questions and take tests—just without saving your
+        history. Upgrade anytime if you want to keep a record of your progress.
+      </p>
+    </section>
+
+    <mat-divider class="divider"></mat-divider>
+
+    <!-- Mobile layout: stacked cards with chips -->
+    <ng-container *ngIf="isSmDown(); else desktopView">
+      <section class="plans-mobile">
+        <mat-card
+          class="plan-card"
+          *ngFor="let p of PLANS"
+          appearance="outlined"
+        >
+          <div class="plan-card-header">
+            <mat-chip
+              class="plan-chip"
+              [color]="planColor(p.PlanCode)"
+              selected
+              (click)="choosePlan(p)"
+            >
+              {{ p.PlanCode }}
+            </mat-chip>
+
+            <div class="plan-name">
+              <span class="plan-name-main">{{ p.PlanName }}</span>
+              <span class="plan-billing">
+                {{ fmtBilling(p) }}
+              </span>
+            </div>
+          </div>
+
+          <p class="plan-description">
+            {{ p.Description }}
+          </p>
+
+          <div class="plan-footer">
+            <span class="plan-price">
+              <strong>Price:</strong> {{ fmtPrice(p) }}
+            </span>
+          </div>
+        </mat-card>
+      </section>
+    </ng-container>
+
+    <!-- Desktop / tablet layout: table -->
+    <ng-template #desktopView>
+      <section class="plans-table-wrapper">
+        <div class="plans-table-container">
+          <table class="plans-table" aria-label="ITechJump subscription plans">
+            <thead>
+              <tr>
+                <th class="col-plan">Plan</th>
+                <th class="col-name">PlanName</th>
+                <th class="col-desc">Description</th>
+                <th class="col-price">Price</th>
+                <th class="col-billing">Billing</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of PLANS" class="plan-row">
+                <td class="col-plan">
+                  <button
+                    mat-raised-button
+                    [color]="planColor(p.PlanCode)"
+                    [ngClass]="{ 'btn-small': isMdDown() }"
+                    (click)="choosePlan(p)"
+                    [attr.aria-label]="'Select ' + p.PlanCode"
+                  >
+                    {{ p.PlanCode }}
+                  </button>
+                </td>
+                <td class="col-name">
+                  {{ p.PlanName }}
+                </td>
+                <td class="col-desc">
+                  {{ p.Description }}
+                </td>
+                <td class="col-price">
+                  {{ fmtPrice(p) }}
+                </td>
+                <td class="col-billing">
+                  {{ fmtBilling(p) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </ng-template>
+
+    <!-- Footnote -->
+    <section class="footnote">
+      <p>
+        <small>
+          Note: ITechJump is a learning and practice platform. It tracks your answers, scores,
+          and progress only—no job applications are submitted on your behalf.
+        </small>
+      </p>
+    </section>
+  </mat-card>
+</div>

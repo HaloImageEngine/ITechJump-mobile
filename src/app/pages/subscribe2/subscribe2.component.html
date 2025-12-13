@@ -1,0 +1,131 @@
+<!-- src/app/subscribe2/subscribe2.component.html -->
+
+<div class="main-page subscribe2-page">
+  <mat-card class="subscribe2-card">
+    <div class="header">
+      <h1 class="page-title">
+        Subscribe – Confirm Details
+      </h1>
+    </div>
+
+    <!-- Error alert -->
+    <div class="alert alert-error" *ngIf="error()">
+      {{ error() }}
+    </div>
+
+    <div class="content">
+      <!-- Plan: code + name -->
+      <section class="section-block">
+        <div class="label">Plan (code)</div>
+        <div class="plan-header-row">
+          <mat-chip
+            [color]="planColor(displayPlanCode)"
+            selected
+            class="plan-chip"
+          >
+            {{ displayPlanCode }}
+          </mat-chip>
+
+          <h2 class="plan-name">
+            {{ displayPlanName }}
+          </h2>
+
+          <span class="loading-text" *ngIf="loading()">
+            Loading…
+          </span>
+        </div>
+      </section>
+
+      <!-- Description -->
+      <section class="section-block">
+        <div class="label">Plan Description</div>
+        <p class="value">
+          {{ displayDescription }}
+        </p>
+      </section>
+
+      <!-- Price -->
+      <section class="section-block">
+        <div class="label">Price</div>
+        <p class="value">
+          {{ displayPrice }}
+        </p>
+      </section>
+
+      <!-- User Info -->
+      <section class="section-block">
+        <div class="label">User ID</div>
+        <p class="value">
+          {{ userId || '(not supplied)' }}
+        </p>
+      </section>
+
+      <section class="section-block">
+        <div class="label">User Alias</div>
+        <p class="value">
+          {{ userAlias || '(not supplied)' }}
+        </p>
+      </section>
+
+      <!-- Subscription Dates -->
+      <section class="section-block">
+        <div class="label">Subscription Start Date</div>
+        <p class="value">
+          {{ subscriptionStartDate || 'Not calculated' }}
+        </p>
+      </section>
+
+      <section class="section-block">
+        <div class="label">Subscription End Date</div>
+        <p class="value">
+          {{ subscriptionEndDate || 'Not calculated' }}
+        </p>
+      </section>
+
+      <!-- Status and Subscription ID Row -->
+      <section class="section-block status-subscription-row">
+        <div class="left-column">
+          <div class="label">Subscription ID</div>
+          <p class="value">
+            {{ apiPlan?.SubscriptionId || '(not available)' }}
+          </p>
+        </div>
+        <div class="right-column">
+          <div class="label">Plan Status</div>
+          <div class="active-chip">
+            <mat-chip
+              [color]="isActive ? 'accent' : 'primary'"
+              [ngClass]="{ 'chip-active': isActive, 'chip-inactive': !isActive }"
+            >
+              {{ isActive ? 'Active' : 'Inactive' }}
+            </mat-chip>
+          </div>
+        </div>
+      </section>
+
+      <!-- Divider-like line -->
+      <div class="divider-like"></div>
+
+      <!-- Actions -->
+      <section class="actions">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="backToPlans()"
+        >
+          Back to Plans
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="handleContinue()"
+          [disabled]="loading() || !displayPlanCode || !apiPlan"
+        >
+          Continue
+        </button>
+      </section>
+    </div>
+  </mat-card>
+</div>

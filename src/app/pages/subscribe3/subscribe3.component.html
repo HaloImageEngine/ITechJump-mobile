@@ -1,0 +1,219 @@
+<!-- src/app/subscribe3/subscribe3.component.html -->
+
+<div class="main-page subscribe3-page">
+  <mat-card class="subscribe3-card">
+    <div class="header">
+      <h1 class="page-title">
+        Subscription – Confirmation
+      </h1>
+    </div>
+
+    <!-- Error -->
+    <div class="alert alert-error" *ngIf="error()">
+      {{ error() }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-row" *ngIf="loading()">
+      <mat-progress-spinner
+        diameter="20"
+        mode="indeterminate"
+      ></mat-progress-spinner>
+      <span class="loading-text">
+        Creating your subscription…
+      </span>
+    </div>
+
+    <div class="content">
+      <section class="section-header">
+        <div class="chip-row">
+          <mat-chip color="primary" selected class="plan-chip">
+            {{ hdrPlan }}
+          </mat-chip>
+
+          <h2 class="plan-title">
+            {{ hdrName }}
+          </h2>
+
+          <ng-container *ngIf="sub?.Status as status">
+            <mat-chip
+              [ngClass]="statusClass(status)"
+              selected
+              class="status-chip"
+              size="small"
+            >
+              {{ status }}
+            </mat-chip>
+          </ng-container>
+        </div>
+
+        <mat-divider class="divider"></mat-divider>
+      </section>
+
+      <!-- Fields grid -->
+      <section class="fields-grid">
+        <!-- IDs & User -->
+        <div class="field-card">
+          <div class="field-label">Subscription ID</div>
+          <div class="field-value">
+            {{ sub?.SubscriptionId ?? '—' }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">User ID</div>
+          <div class="field-value">
+            {{ sub?.UserId ?? userId }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">User Alias</div>
+          <div class="field-value">
+            {{ sub?.UserAlias ?? userAlias }}
+          </div>
+        </div>
+
+        <!-- Plan -->
+        <div class="field-card">
+          <div class="field-label">Plan Code</div>
+          <div class="field-value">
+            {{ sub?.PlanCode ?? planCode }}
+          </div>
+        </div>
+
+        <div class="field-card span-2">
+          <div class="field-label">Plan Name</div>
+          <div class="field-value">
+            {{ sub?.PlanName ?? '—' }}
+          </div>
+        </div>
+
+        <div class="field-card span-3">
+          <div class="field-label">Plan Description</div>
+          <div class="field-value">
+            {{ sub?.Description ?? '—' }}
+          </div>
+        </div>
+
+        <!-- Billing / Price -->
+        <div class="field-card">
+          <div class="field-label">Auto Renew</div>
+          <div class="field-value">
+            <mat-chip
+              [ngClass]="sub?.AutoRenew ? 'auto-yes' : 'auto-no'"
+              class="auto-chip"
+            >
+              {{ sub?.AutoRenew ? 'Yes' : 'No' }}
+            </mat-chip>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">Quantity</div>
+          <div class="field-value">
+            {{ sub?.Quantity ?? '—' }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">Price at Purchase</div>
+          <div class="field-value">
+            {{ fmtMoney(sub?.PriceAtPurchase, sub?.Currency || 'USD') }}
+          </div>
+        </div>
+
+        <!-- Periods -->
+        <div class="field-card">
+          <div class="field-label">Start (UTC)</div>
+          <div class="field-value">
+            {{ fmtDate(sub?.StartUtc) }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">Current Period Start (UTC)</div>
+          <div class="field-value">
+            {{ fmtDate(sub?.CurrentPeriodStartUtc) }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">Current Period End (UTC)</div>
+          <div class="field-value">
+            {{ fmtDate(sub?.CurrentPeriodEndUtc) }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">Trial Ends (UTC)</div>
+          <div class="field-value">
+            {{ fmtDate(sub?.TrialEndUtc) }}
+          </div>
+        </div>
+
+        <!-- Extras -->
+        <div class="field-card">
+          <div class="field-label">Ticket Sets</div>
+          <div class="field-value">
+            {{ sub?.TicketSets ?? '—' }}
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">Currency</div>
+          <div class="field-value">
+            {{ sub?.Currency ?? '—' }}
+          </div>
+        </div>
+
+        <!-- Audit -->
+        <div class="field-card span-2">
+          <div class="field-label">Created At (UTC)</div>
+          <div class="field-value">
+            {{ fmtDate(sub?.CreatedAt) }}
+          </div>
+        </div>
+
+        <div class="field-card span-2">
+          <div class="field-label">Updated At (UTC)</div>
+          <div class="field-value">
+            {{ fmtDate(sub?.UpdatedAt) }}
+          </div>
+        </div>
+      </section>
+
+      <!-- No sub warning -->
+      <div
+        class="alert alert-warning"
+        *ngIf="!loading() && !error() && !sub"
+      >
+        No subscription details available. Please go back and try again.
+      </div>
+
+      <mat-divider class="divider divider-bottom"></mat-divider>
+
+      <!-- Next actions -->
+      <section class="next-actions">
+        <h2 class="next-actions-title">
+          Choose Your Next Action:
+        </h2>
+
+        <div class="next-actions-grid">
+          <button
+            *ngFor="let item of navigationItems"
+            mat-raised-button
+            [color]="item.emphasis ? 'primary' : undefined"
+            type="button"
+            class="next-action-btn"
+            [ngClass]="{ 'emphasis': item.emphasis }"
+            (click)="onNavigate(item.to)"
+            [disabled]="!sub"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+      </section>
+    </div>
+  </mat-card>
+</div>

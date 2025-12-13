@@ -1,0 +1,155 @@
+<div class="pc-test-page">
+  <div class="header-section">
+    <h1 class="page-title">
+      <span class="title">ITech<span class="logo-j">J</span>ump Interview Simulator - Desktop</span>
+    </h1>
+    <p class="page-subtitle">
+      Choose a category, pick a question, think through your answer, then reveal the model answer.
+    </p>
+  </div>
+
+  <div *ngIf="error()" class="error-box">
+    {{ error() }}
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Left panel: Category and Question selection -->
+    <div class="left-panel">
+      <!-- Category dropdown -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Category</mat-label>
+        <mat-select
+          [disabled]="loadingCategories()"
+          [value]="selectedCategory()"
+          (selectionChange)="onCategoryChange($event.value)">
+          <mat-option *ngFor="let c of categories()" [value]="c.Category">
+            {{ c.Category }} — {{ c.Description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Questions dropdown -->
+      <mat-form-field
+        *ngIf="selectedCategory()"
+        appearance="outline"
+        class="full-width">
+        <mat-label>Questions</mat-label>
+        <mat-select
+          [disabled]="loadingQuestions() || !questions().length"
+          [value]="selectedQuestionId()"
+          (selectionChange)="onSelectQuestion($event.value)">
+          <mat-option *ngFor="let q of questions()" [value]="q.ID">
+            {{ getQuestionPreview(q) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Question ID display -->
+      <div *ngIf="selectedQuestion()" class="question-id-box">
+        <span class="question-id-label">Question ID:</span>
+        <span class="question-id-value">{{ selectedQuestionId() }}</span>
+      </div>
+
+      <!-- Full question textbox -->
+      <mat-form-field
+        *ngIf="selectedQuestion()"
+        appearance="outline"
+        class="full-width question-box">
+        <mat-label>Full Question</mat-label>
+        <textarea
+          matInput
+          [value]="selectedQuestion()?.Question"
+          rows="8"
+          readonly>
+        </textarea>
+      </mat-form-field>
+
+      <!-- User answer textbox -->
+      <mat-form-field
+        *ngIf="selectedQuestion()"
+        appearance="outline"
+        class="full-width user-answer-box">
+        <mat-label>Your Answer</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="userAnswer"
+          rows="10"
+          placeholder="Type your answer here before revealing the model answer...">
+        </textarea>
+        <mat-hint>Write your thoughts and approach to this question</mat-hint>
+      </mat-form-field>
+
+      <!-- Action buttons -->
+      <div class="button-row" *ngIf="selectedQuestion()">
+        <button mat-raised-button class="hint-btn" (click)="onGetHint()">
+          Hint
+        </button>
+        <button mat-raised-button class="submit-btn" (click)="onSubmitAnswer()" [disabled]="!userAnswer.trim()">
+          Submit Answer
+        </button>
+        <button mat-raised-button class="show-answer-btn" (click)="onShowAnswer()">
+          Show Answer
+        </button>
+      </div>
+    </div>
+
+    <!-- Right panel: Answer display -->
+    <div class="right-panel">
+      <!-- Grade Response Box -->
+      <mat-card *ngIf="gradeResponse()" class="grade-response-card">
+        <mat-card-header>
+          <mat-card-title>Answer Grade Results</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="grade-item">
+            <span class="grade-label">Question ID:</span>
+            <span class="grade-value">{{ gradeResponse().QuestionID }}</span>
+          </div>
+          <div class="grade-item">
+            <span class="grade-label">Total Keywords:</span>
+            <span class="grade-value">{{ gradeResponse().NumKeyWords }}</span>
+          </div>
+          <div class="grade-item">
+            <span class="grade-label">Matches Found:</span>
+            <span class="grade-value matches">{{ gradeResponse().Matches }}</span>
+          </div>
+          <div class="grade-item grade-score">
+            <span class="grade-label">Grade:</span>
+            <span class="grade-value score">{{ gradeResponse().Grade }}%</span>
+          </div>
+          <div *ngIf="gradeResponse().KeywordList && gradeResponse().KeywordList.length > 0" class="keywords-section">
+            <span class="grade-label">Keywords:</span>
+            <div class="keywords-list">
+              <mat-chip *ngFor="let keyword of gradeResponse().KeywordList">{{ keyword }}</mat-chip>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Answer textbox -->
+      <mat-form-field
+        *ngIf="selectedQuestion() && (showAnswer() || gradeResponse())"
+        appearance="outline"
+        class="full-width answer-box">
+        <mat-label>Model Answer</mat-label>
+        <textarea
+          matInput
+          [value]="selectedQuestion()?.Answer"
+          rows="20"
+          readonly>
+        </textarea>
+      </mat-form-field>
+
+      <!-- Placeholder when no answer shown -->
+      <div *ngIf="!showAnswer() && !gradeResponse() && selectedQuestion()" class="answer-placeholder">
+        <mat-icon>visibility_off</mat-icon>
+        <p>Click "Show Answer" to reveal the model answer</p>
+      </div>
+
+      <div *ngIf="!selectedQuestion()" class="answer-placeholder">
+        <mat-icon>help_outline</mat-icon>
+        <p>Select a question to begin</p>
+      </div>
+    </div>
+  </div>
+</div>

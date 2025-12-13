@@ -1,0 +1,116 @@
+<div class="main-page login-page">
+  <!-- Checkboxes in top right -->
+  <div class="checkbox-controls">
+    <mat-checkbox
+      [checked]="cookieExists()"
+      [disabled]="true"
+      color="primary"
+      class="status-checkbox"
+      title="Cookie Exist"
+    >
+      CE
+    </mat-checkbox>
+
+    <mat-checkbox
+      [(ngModel)]="redirectToLogin"
+      color="primary"
+      class="redirect-checkbox"
+      title="To Login"
+    >
+      LG
+    </mat-checkbox>
+  </div>
+
+  <h1 class="page-title">
+    <span class="logo-i">I</span>Tech
+    <span class="logo-j">J</span>ump Login
+  </h1>
+  <p class="page-subtitle">
+    Sign in with your ItechJump alias or your email address.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="login-form">
+    <!-- Alias or Email field -->
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>{{ aliasLabel() }}</mat-label>
+      <input
+        matInput
+        formControlName="aliasOrEmail"
+        [attr.placeholder]="aliasLabel()"
+        [attr.autocomplete]="mode() === 'alias' ? 'username' : 'email'"
+        [attr.inputmode]="mode() === 'alias' ? 'text' : 'email'"
+        [attr.name]="mode() === 'alias' ? 'username' : 'email'"
+        [attr.maxlength]="mode() === 'alias' ? 8 : 255"
+      />
+      <mat-error *ngIf="mode() === 'alias' && aliasError()">
+        {{ aliasError() }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Password field with eye icon -->
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        placeholder="Password"
+        [type]="showPassword() ? 'text' : 'password'"
+        autocomplete="current-password"
+        name="current-password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="toggleShowPassword()"
+        [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        (mousedown)="$event.preventDefault()"
+      >
+        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <!-- Toggle alias/email mode -->
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      class="mode-toggle-btn"
+      (click)="toggleMode()"
+      [disabled]="loading()"
+    >
+      {{ mode() === 'alias' ? 'Use Email Instead' : 'Use Alias Instead' }}
+    </button>
+
+    <!-- Login/Register button -->
+    <div class="button-row">
+      <button
+        mat-raised-button
+        color="accent"
+        type="submit"
+        class="login-btn"
+        [disabled]="loading() || form.invalid"
+      >
+        <ng-container *ngIf="!loading(); else loadingTpl">
+          {{ buttonLabel() }}
+        </ng-container>
+      </button>
+    </div>
+
+    <ng-template #loadingTpl>
+      <span class="loading-wrap">
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="18"
+          class="loading-spinner"
+        ></mat-progress-spinner>
+        <span class="loading-text">Signing in...</span>
+      </span>
+    </ng-template>
+
+    <!-- Error box -->
+    <div *ngIf="error()" class="error-box">
+      {{ error() }}
+    </div>
+  </form>
+</div>

@@ -1,0 +1,77 @@
+<div class="main-page">
+  <h1 class="page-title">
+    <span class="title">ITech<span class="logo-j">J</span>ump Interview Simulator</span>
+  </h1>
+  <p class="page-subtitle">
+    Choose a category, pick a question, think through your answer, then reveal the model answer.
+  </p>
+
+  <div *ngIf="error()" class="error-box">
+    {{ error() }}
+  </div>
+
+  <!-- Category dropdown -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Category</mat-label>
+    <mat-select
+      [disabled]="loadingCategories()"
+      [value]="selectedCategory()"
+      (selectionChange)="onCategoryChange($event.value)">
+      <mat-option *ngFor="let c of categories()" [value]="c.Category">
+        {{ c.Category }} — {{ c.Description }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Questions dropdown -->
+  <mat-form-field
+    *ngIf="selectedCategory()"
+    appearance="outline"
+    class="full-width">
+    <mat-label>Questions</mat-label>
+    <mat-select
+      [disabled]="loadingQuestions() || !questions().length"
+      [value]="selectedQuestionId()"
+      (selectionChange)="onSelectQuestion($event.value)">
+      <mat-option *ngFor="let q of questions()" [value]="q.ID">
+        {{ getQuestionPreview(q) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Full question textbox -->
+  <mat-form-field
+    *ngIf="selectedQuestion()"
+    appearance="outline"
+    class="full-width">
+    <mat-label>Full Question</mat-label>
+    <textarea
+      matInput
+      [value]="selectedQuestion()?.Question"
+      rows="5"
+      readonly>
+    </textarea>
+  </mat-form-field>
+
+  <!-- Show Answer button -->
+  <div class="button-row" *ngIf="selectedQuestion()">
+    <button mat-raised-button class="show-answer-btn" (click)="onShowAnswer()">
+      Show Answer
+    </button>
+  </div>
+
+  <!-- Answer textbox -->
+  <mat-form-field
+    *ngIf="selectedQuestion() && showAnswer()
+    "
+    appearance="outline"
+    class="full-width answer-box">
+    <mat-label>Model Answer</mat-label>
+    <textarea
+      matInput
+      [value]="selectedQuestion()?.Answer"
+      rows="10"
+      readonly>
+    </textarea>
+  </mat-form-field>
+</div>

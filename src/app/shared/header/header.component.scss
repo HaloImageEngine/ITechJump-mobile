@@ -1,0 +1,355 @@
+/* header.component.scss
+   Left-aligned brand/logo, right-aligned nav + alias,
+   responsive nav styling matching your HTML.
+*/
+
+.header {
+  width: 100%;
+  background: #0b1220; // dark top bar
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: none;  // IMPORTANT: no centering container
+  margin: 0;        // IMPORTANT: remove auto-centering
+  padding: 0 12px;  // reduce to 0 for hard-left edge if desired
+  min-height: 64px;
+}
+
+/* Brand / Logo */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 36px;
+  min-width: 36px;
+  padding: 0 10px;
+
+  background: #19d38b;
+  color: #0b1220;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-id {
+  color: #39ff14;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Animated title pieces */
+.itechjump-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.itechjump-title .itech,
+.itechjump-title .ump {
+  color: #ffffff;
+}
+
+.itechjump-title .jump-j {
+  display: inline-block; // needed for translateY animation
+  color: #fa0996;
+  font-weight: 900;
+}
+
+/* Right side: nav + alias */
+.header-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 25px;
+  gap: 12px;
+}
+
+/* Auth section */
+.auth-section {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* User alias - BRIGHT ACID GREEN */
+.user-alias {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #39ff14; /* Bright acid green */
+  text-shadow:
+    0 0 8px rgba(57, 255, 20, 0.6),
+    0 0 12px rgba(57, 255, 20, 0.4);
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: rgba(30, 58, 95, 0.1);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Optional: subtle glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 8px rgba(57, 255, 20, 0.6),
+      0 0 12px rgba(57, 255, 20, 0.4);
+  }
+  50% {
+    text-shadow:
+      0 0 12px rgba(57, 255, 20, 0.8),
+      0 0 16px rgba(57, 255, 20, 0.6);
+  }
+}
+
+/* Pill-style Login / Logoff button */
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 16px;
+  border-radius: 999px;
+  border: none;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  /* Unique bright pill color, matches your brand accent */
+  background-color: #fa0996;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(250, 9, 150, 0.35);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(250, 9, 150, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(250, 9, 150, 0.35);
+  }
+}
+
+/* Version popup */
+.version-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* above nav too */
+}
+
+.version-modal {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  min-width: 240px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.version-body {
+  .version-line {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #1e3a5f;
+  }
+}
+
+.version-close {
+  align-self: flex-end;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background-color: #1e3a5f;
+  color: #ffffff;
+
+  &:hover {
+    background-color: #2c4f7c;
+  }
+}
+
+/* NAV STYLES (for NavComponent host area) */
+/* Note: actual .nav internals are styled in nav.component.scss;
+   these here affect the overall placement/look when needed. */
+
+.nav {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Hamburger button */
+.hamburger {
+  display: none; // shown on mobile via media query
+  background: transparent;
+  border: 0;
+  padding: 8px;
+  margin-right: 4px;
+  cursor: pointer;
+
+  span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #ffffff;
+    margin: 4px 0;
+    border-radius: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+}
+
+/* Link list */
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    color: #e6e9ef;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 600;
+    padding: 6px 4px;
+    border-radius: 6px;
+    opacity: 0.95;
+    transition: opacity 0.15s ease, background 0.15s ease;
+
+    &:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    &.active {
+      color: #ffffff;
+      background: rgba(250, 9, 150, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(250, 9, 150, 0.35);
+    }
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .header-inner {
+    padding: 0 8px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile dropdown panel */
+  .nav-links {
+    position: absolute;
+    top: 56px;
+    right: 8px;
+    min-width: 180px;
+    max-width: calc(100vw - 16px);
+    z-index: 1000;
+
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+
+    padding: 8px;
+    background: #0b1220;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+
+    /* closed by default */
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+
+    &.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    a {
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+  }
+
+  .user-alias {
+    padding: 3px 12px;
+    font-size: 0.85rem;
+  }
+
+  .auth-section {
+    gap: 6px;
+  }
+
+  .auth-btn {
+    padding: 3px 12px;
+    font-size: 0.85rem;
+  }
+}

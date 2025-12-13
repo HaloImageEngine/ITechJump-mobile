@@ -1,0 +1,155 @@
+.footer {
+  width: 100%;
+  background: #0b1220;
+  color: #dfe3ea;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 10px 0;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  padding: 0 12px;
+  min-height: 48px;
+  gap: 10px;
+}
+
+/* Brand / logo (small) */
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 26px;
+  min-width: 26px;
+  padding: 0 7px;
+
+  background: #19d38b;  /* same green as header */
+  color: #0b1220;
+  font-weight: 800;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.footer-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.footer-j {
+  color: #fa0996; /* pink J in wordmark */
+  font-weight: 900;
+}
+
+/* Copy row */
+.footer-copy {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  text-align: right;
+}
+
+/* Pink year */
+.year-pink {
+  color: #fa0996;
+  font-weight: 800;
+}
+
+/* ----- COLUMN LAYOUT FIX ----- */
+/* Base columns */
+.footer-inner .col {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+/* Left column stacks + stays left */
+.footer-inner .col.left {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+
+/* Middle column stacks + stays centered */
+.footer-inner .col.middle {
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Right column = logos in a row + pinned right */
+.footer-inner .col.right {
+  margin-left: auto;        /* pushes right col to far right */
+  flex-direction: row;      /* force horizontal */
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-right: 12px;      /* breathing room from right edge */
+}
+
+/* If you still use .muted somewhere inside cols */
+.footer-inner .col .muted {
+  text-align: center;
+  margin: 6px 0 0;          /* keeps spacing tidy */
+  width: 100%;
+}
+
+/* Logos */
+.tech-logo {
+  height: 22px;
+  width: auto;
+  opacity: 0.95;
+  object-fit: contain;
+  display: block;
+  transition: all 0.15s ease-in-out;
+}
+
+.tech-logo:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* Optional: individual tweaked sizes */
+.tech-logo.angular { height: 22px; }
+.tech-logo.vite { height: 22px; }
+.tech-logo.html { height: 22px; }
+
+/* Responsive stack */
+@media (max-width: 700px) {
+  .footer-inner {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footer-copy {
+    text-align: center;
+  }
+
+  .footer-inner .col.left,
+  .footer-inner .col.middle,
+  .footer-inner .col.right {
+    align-items: center;
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .footer-inner .col.right {
+    justify-content: center;
+    padding-right: 0;
+  }
+}

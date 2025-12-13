@@ -1,0 +1,141 @@
+<div class="main-page contact-page">
+  <mat-card class="contact-card">
+    <div class="header">
+      <h1 class="page-title">Contact Support</h1>
+      <p class="page-subtitle">
+        Submit a support ticket and our team will get back to you within 24-48 hours.
+      </p>
+    </div>
+
+    <!-- Support Info Banner -->
+    <div class="info-banner">
+      <h3>📧 Support Email</h3>
+      <p>support@itechjump.com</p>
+      <p class="info-text">
+        <strong>Response Time:</strong> Most tickets are answered within 24-48 hours during business days.<br>
+        <strong>Priority Support:</strong> Pro subscribers receive priority responses within 12 hours.
+      </p>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="success()" class="success-message">
+      ✅ Your support ticket has been submitted successfully! We'll respond to your email soon.
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error()" class="error-message">
+      {{ error() }}
+    </div>
+
+    <!-- Contact Form -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="contact-form">
+
+      <!-- Subject Dropdown -->
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Subject</mat-label>
+        <mat-select formControlName="subject" placeholder="Select a topic">
+          <mat-option *ngFor="let option of subjectOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="getErrorMessage('subject')">
+          {{ getErrorMessage('subject') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- User Email -->
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Your Email</mat-label>
+        <input
+          matInput
+          formControlName="email"
+          type="email"
+          placeholder="your.email@example.com"
+          autocomplete="email"
+        />
+        <mat-error *ngIf="getErrorMessage('email')">
+          {{ getErrorMessage('email') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- User Info Row -->
+      <div class="user-info-row">
+        <!-- User ID -->
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>User ID</mat-label>
+          <input
+            matInput
+            formControlName="userId"
+            placeholder="Auto-populated"
+            readonly
+          />
+          <mat-error *ngIf="getErrorMessage('userId')">
+            {{ getErrorMessage('userId') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- User Alias -->
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>User Alias</mat-label>
+          <input
+            matInput
+            formControlName="userAlias"
+            placeholder="Auto-populated"
+            readonly
+          />
+          <mat-error *ngIf="getErrorMessage('userAlias')">
+            {{ getErrorMessage('userAlias') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Comment Text Area -->
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Comment / Description</mat-label>
+        <textarea
+          matInput
+          formControlName="comment"
+          placeholder="Please describe your issue or question in detail..."
+          rows="8"
+          maxlength="2000"
+        ></textarea>
+        <mat-hint align="end">{{ form.get('comment')?.value?.length || 0 }} / 2000</mat-hint>
+        <mat-error *ngIf="getErrorMessage('comment')">
+          {{ getErrorMessage('comment') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Submit Button -->
+      <div class="button-row">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="submit-btn"
+          [disabled]="loading() || form.invalid"
+        >
+          <span *ngIf="!loading()">Submit Ticket</span>
+          <span *ngIf="loading()" class="loading-wrap">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="20"
+              class="loading-spinner"
+            ></mat-progress-spinner>
+            <span class="loading-text">Submitting...</span>
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Additional Info -->
+    <div class="additional-info">
+      <h3>Before Submitting:</h3>
+      <ul>
+        <li>Check our <a href="/faq" routerLink="/faq">FAQ page</a> for common questions</li>
+        <li>Make sure you're logged in to auto-populate your user information</li>
+        <li>Include as much detail as possible in your comment</li>
+        <li>For billing issues, please include your subscription ID if available</li>
+      </ul>
+    </div>
+  </mat-card>
+</div>

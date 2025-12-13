@@ -1,0 +1,164 @@
+/* src/app/register/register.component.scss */
+
+.main-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: #eceff4;
+  min-height: 100vh;
+}
+
+.register-page {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 760px;
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.page-title {
+  font-size: 1.3rem;
+  margin: 4px 0;
+  font-weight: bold;
+  color: #1e3a5f;
+
+  .logo-i,
+  .logo-j {
+    color: #fa0996;
+    font-weight: bold;
+  }
+}
+
+.page-subtitle {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Header row (title + login button) */
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Grid rows */
+.grid-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.flex-1 {
+  flex: 1 1 0;
+}
+
+.flex-2 {
+  flex: 2 1 0;
+}
+
+.flex-3 {
+  flex: 3 1 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Server message styling */
+.server-msg {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.server-msg-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.server-msg-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.server-msg-close {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* Button row */
+.button-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* Ensure Material form fields have white backgrounds */
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff;
+    }
+  }
+}
+
+/* Snackbars */
+.success-snack {
+  background-color: #16a34a;
+  color: #fff;
+}
+
+.alias-warn-snack {
+  background-color: #f97316;
+  color: #fff;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .register-card {
+    margin-top: 16px;
+    padding: 12px;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid-row {
+    flex-direction: column;
+  }
+
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}

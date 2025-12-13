@@ -1,0 +1,247 @@
+<!-- src/app/register/register.component.html -->
+<div class="main-page register-page">
+  <mat-card class="register-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="header-row">
+        <h1 class="page-title">
+          <span class="logo-i">ITech</span><span class="logo-j">Jump</span> Registration
+        </h1>
+
+        <button mat-button type="button" (click)="goToLogin()">
+          Already have an account? Login
+        </button>
+      </div>
+
+      <p class="page-subtitle">
+        Create your ITechJump account to save cards, track winners, and manage your subscriptions.
+      </p>
+
+      <!-- Server message -->
+      <div
+        class="server-msg"
+        *ngIf="serverMsg.text"
+        [ngClass]="{ 'server-msg-error': serverMsg.type === 'error', 'server-msg-info': serverMsg.type === 'info' }"
+      >
+        <span>{{ serverMsg.text }}</span>
+        <button class="server-msg-close" type="button" (click)="closeServerMsg()">×</button>
+      </div>
+
+      <!-- Name row -->
+      <div class="grid-row">
+        <mat-form-field appearance="outline" class="field flex-2">
+          <mat-label>First Name *</mat-label>
+          <input
+            matInput
+            formControlName="firstName"
+            autocomplete="given-name"
+            (input)="onFirstNameInput($event)"
+          />
+          <mat-hint>Letters only</mat-hint>
+          <mat-error *ngIf="f['firstName'].touched && f['firstName'].invalid">
+            <span *ngIf="f['firstName'].hasError('required')">First name is required.</span>
+            <span *ngIf="f['firstName'].hasError('pattern')">Letters only.</span>
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>M.I.</mat-label>
+          <input
+            matInput
+            formControlName="middleInitial"
+            autocomplete="additional-name"
+            maxlength="1"
+            (input)="onMiddleInitialInput($event)"
+          />
+          <mat-error *ngIf="f['middleInitial'].touched && f['middleInitial'].invalid">
+            M.I. must be a single letter.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field flex-3">
+          <mat-label>Last Name *</mat-label>
+          <input
+            matInput
+            formControlName="lastName"
+            autocomplete="family-name"
+            (input)="onLastNameInput($event)"
+          />
+          <mat-hint>Letters only</mat-hint>
+          <mat-error *ngIf="f['lastName'].touched && f['lastName'].invalid">
+            <span *ngIf="f['lastName'].hasError('required')">Last name is required.</span>
+            <span *ngIf="f['lastName'].hasError('pattern')">Letters only.</span>
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Login email -->
+      <div class="grid-row">
+        <mat-form-field appearance="outline" class="field full-width">
+          <mat-label>Login Email *</mat-label>
+          <input
+            matInput
+            formControlName="email"
+            autocomplete="email"
+            inputmode="email"
+          />
+          <mat-hint>Used as your login and account username</mat-hint>
+          <mat-error *ngIf="f['email'].touched && f['email'].invalid">
+            <span *ngIf="f['email'].hasError('required')">Login email is required.</span>
+            <span *ngIf="f['email'].hasError('email')">Enter a valid email.</span>
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Alias + Password -->
+      <div class="grid-row">
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>User Alias (6 letters + 2 numbers) *</mat-label>
+          <input
+            matInput
+            formControlName="userAlias"
+            maxlength="8"
+            autocomplete="username"
+            (input)="onAliasInput($event)"
+          />
+          <mat-hint>Shown in the app; must be exactly 8 characters</mat-hint>
+          <mat-error *ngIf="f['userAlias'].touched && f['userAlias'].invalid">
+            {{ f['userAlias'].getError('alias') || 'Alias must be exactly 8 characters.' }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>Password *</mat-label>
+          <input
+            matInput
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Toggle password visibility"
+            (click)="toggleShowPassword()"
+          >
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint>Min 8 characters recommended</mat-hint>
+          <mat-error *ngIf="f['password'].touched && f['password'].invalid">
+            <span *ngIf="f['password'].hasError('required')">Password is required.</span>
+            <span *ngIf="f['password'].hasError('minlength')">Min 8 characters recommended.</span>
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Address row -->
+      <div class="grid-row">
+        <mat-form-field appearance="outline" class="field flex-2">
+          <mat-label>City</mat-label>
+          <input
+            matInput
+            formControlName="city"
+            autocomplete="address-level2"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>State (2-letter)</mat-label>
+          <input
+            matInput
+            formControlName="state"
+            autocomplete="address-level1"
+            maxlength="2"
+            (input)="onStateInput($event)"
+          />
+          <mat-hint>State Code (e.g., TX)</mat-hint>
+          <mat-error *ngIf="f['state'].touched && f['state'].invalid">
+            {{ f['state'].getError('state') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>Zip</mat-label>
+          <input
+            matInput
+            formControlName="zip"
+            autocomplete="postal-code"
+            inputmode="numeric"
+            maxlength="5"
+            (input)="onZipInput($event)"
+          />
+          <mat-hint>Optional; 5 digits</mat-hint>
+          <mat-error *ngIf="f['zip'].touched && f['zip'].invalid">
+            {{ f['zip'].getError('zip') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Phone + Confirm Password row -->
+      <div class="grid-row">
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>Phone</mat-label>
+          <input
+            matInput
+            formControlName="phoneNum"
+            autocomplete="tel"
+            inputmode="tel"
+            maxlength="12"
+            placeholder="1234567890"
+            (input)="onPhoneInput($event)"
+          />
+          <mat-hint>Optional; enter 10 digits (will format as 123-456-7890)</mat-hint>
+          <mat-error *ngIf="f['phoneNum'].touched && f['phoneNum'].invalid">
+            {{ f['phoneNum'].getError('phoneNum') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>Confirm Password *</mat-label>
+          <input
+            matInput
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Toggle password visibility"
+            (click)="toggleShowConfirmPassword()"
+          >
+            <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint>Re-enter your password</mat-hint>
+          <mat-error *ngIf="f['confirmPassword'].touched && f['confirmPassword'].invalid">
+            <span *ngIf="f['confirmPassword'].hasError('required')">Please confirm your password.</span>
+          </mat-error>
+          <mat-error *ngIf="form.hasError('passwordMismatch') && f['confirmPassword'].touched">
+            Passwords do not match.
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Actions -->
+      <div class="button-row">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="submitting()"
+        >
+          {{ submitting() ? 'Submitting...' : 'Create Account' }}
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="onReset()"
+          [disabled]="submitting()"
+        >
+          Reset
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

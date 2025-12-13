@@ -1,0 +1,283 @@
+.nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 10px;
+  /* Make sure the nav sits above the main content */
+  z-index: 1000;
+}
+
+/* Hamburger (mobile only on small screens) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background-color: #1e3a5f;
+    border-radius: 999px;
+  }
+}
+
+/* Main nav list */
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0 16px 0 0; /* Add padding to the right */
+  gap: 12px;
+
+  /* Ensure nav links (and dropdowns) sit above page content */
+  position: relative;
+  z-index: 1100;
+}
+
+/* Each nav item */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  a {
+    text-decoration: none;
+    color: #1e3a5f;
+    font-size: 0.95rem;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: #87ceeb; /* Light blue for inactive */
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &.active {
+      background-color: #ffb6d9; /* Light pink for active */
+      color: #1e3a5f;
+    }
+
+    &:hover {
+      background-color: #b0d9f0; /* Slightly lighter blue on hover */
+    }
+  }
+}
+
+/* Parent items with dropdown */
+.nav-link.has-dropdown {
+  display: inline-flex;
+  align-items: center;
+  background-color: #87ceeb; /* Light blue for inactive dropdowns */
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: #1e3a5f;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background-color: #b0d9f0;
+  }
+}
+
+.caret {
+  margin-left: 4px;
+  transition: transform 0.15s ease;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+/* Submenu styling */
+.submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  padding: 6px 0;
+  margin: 4px 0 0;
+  list-style: none;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  /* Make sure dropdowns are ABOVE everything else */
+  z-index: 1200;
+
+  &.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  li {
+    padding: 0;
+
+    a,
+    .submenu-btn {
+      width: 100%;
+      display: block;
+      text-align: left;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border-radius: 0;
+      background: transparent;
+      border: none;
+      color: #1e3a5f;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #b0d9f0; /* Light blue hover for submenu items */
+      }
+    }
+  }
+}
+
+/* Mobile menu backdrop */
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: transparent;
+  z-index: 1400;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    z-index: 1500; /* Ensure nav is above backdrop */
+  }
+
+  .nav-backdrop {
+    display: block;
+  }
+}
+
+/* Version popup */
+.version-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* above nav too */
+}
+
+.version-modal {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  min-width: 240px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.version-body {
+  .version-line {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #1e3a5f;
+  }
+}
+
+.version-close {
+  align-self: flex-end;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background-color: #1e3a5f;
+  color: #ffffff;
+
+  &:hover {
+    background-color: #2c4f7c;
+  }
+}
+
+/* Responsive: show hamburger, stack menu on mobile */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    right: 10px;
+    left: auto;
+    min-width: max-content;
+    max-width: calc(100vw - 20px);
+    flex-direction: column;
+    align-items: stretch;
+    background-color: #ffffff;
+    padding: 8px 12px 12px;
+    gap: 4px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+    transform: translateY(-12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    /* Make the mobile flyout menu sit above content */
+    z-index: 1500;
+
+    &.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) translateX(80px);
+    }
+  }
+
+  .submenu {
+    position: static;
+    margin-top: 4px;
+    box-shadow: none;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+
+    opacity: 1;
+    transform: none;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0;
+    z-index: 1500; /* keep submenu above content on mobile as well */
+
+    &.open {
+      max-height: 500px;
+      padding: 6px 0;
+    }
+
+    li {
+      width: 100%;
+
+      a,
+      .submenu-btn {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+}
