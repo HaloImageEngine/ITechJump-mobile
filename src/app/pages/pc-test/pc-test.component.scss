@@ -5,7 +5,7 @@
   padding: 24px;
   background-color: #eceff4;
   min-height: 100vh;
-  max-width: 1400px;
+  max-width: 1800px;
   margin: 0 auto;
 
   // Ensure content doesn't sit above header/nav/menus
@@ -38,7 +38,7 @@
 
 .content-wrapper {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.5fr;
   gap: 24px;
   align-items: start;
 
@@ -221,8 +221,8 @@
   height: 100%;
 
   textarea {
-    line-height: 1.6;
-    font-size: 1rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
     background-color: #ffffff;
     max-height: 600px;
     overflow-y: auto;

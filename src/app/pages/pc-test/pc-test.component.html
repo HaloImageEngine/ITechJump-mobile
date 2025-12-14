@@ -60,7 +60,8 @@
           matInput
           [value]="selectedQuestion()?.Question"
           rows="8"
-          readonly>
+          readonly
+          title="Full Question Text">
         </textarea>
       </mat-form-field>
 
@@ -74,7 +75,8 @@
           matInput
           [(ngModel)]="userAnswer"
           rows="10"
-          placeholder="Type your answer here before revealing the model answer...">
+          placeholder="Type your answer here before revealing the model answer..."
+          title="Your Answer Input">
         </textarea>
         <mat-hint>Write your thoughts and approach to this question</mat-hint>
       </mat-form-field>
@@ -136,7 +138,8 @@
           matInput
           [value]="selectedQuestion()?.Answer"
           rows="20"
-          readonly>
+          readonly
+          title="Model Answer">
         </textarea>
       </mat-form-field>
 

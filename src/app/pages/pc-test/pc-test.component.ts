@@ -1,6 +1,6 @@
 // src/app/pages/pc-test/pc-test.component.ts
 
-import { Component, computed, effect, signal } from '@angular/core';
+import { Component, computed, effect, signal, inject } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
 
 import { ItechjumpApiService } from '../../core/services/itechjump-api.service';
 import { CategoryDto } from '../../core/models/category-dto';
@@ -29,7 +31,9 @@ import { QuestionDto } from '../../core/models/question-dto';
     MatInputModule,
     MatIconModule,
     MatCardModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDialogModule,
+    MatListModule
   ],
   templateUrl: './pc-test.component.html',
   styleUrl: './pc-test.component.scss'
@@ -62,7 +66,10 @@ export class PcTestComponent {
     return this.questions().find(q => q.ID === id) ?? null;
   });
 
-  constructor(private api: ItechjumpApiService) {
+  constructor(
+    private api: ItechjumpApiService,
+    private dialog: MatDialog
+  ) {
     // load categories on init
     this.loadCategories();
 
@@ -139,17 +146,28 @@ export class PcTestComponent {
   }
 
   onGetHint(): void {
-    // TODO: Implement API call to get hint for current question
     const questionId = this.selectedQuestionId();
+    if (!questionId) return;
+
     console.log('Get hint for question ID:', questionId);
 
-    // Placeholder - will call API endpoint like:
-    // this.api.getHint(questionId).subscribe({
-    //   next: (hint) => { /* display hint */ },
-    //   error: (err) => { console.error('Error getting hint', err); }
-    // });
+    this.api.getKeywordsByQuestionId(questionId).subscribe({
+      next: (keywords) => {
+        console.log('Keywords received:', keywords);
+        // Extract just the keyword strings
+        const keywordList = keywords.map(k => k.Keyword);
 
-    alert('Hint feature coming soon! This will call the API to get a hint for this question.');
+        // Show dialog with keywords
+        const dialogRef = this.dialog.open(HintDialogComponent, {
+          width: '500px',
+          data: { keywords: keywordList }
+        });
+      },
+      error: (err) => {
+        console.error('Error getting hint', err);
+        this.error.set('Failed to load hints. Please try again.');
+      }
+    });
   }
 
   onSubmitAnswer(): void {
@@ -184,4 +202,48 @@ export class PcTestComponent {
     const text = q.Question ?? '';
     return text.length > 80 ? text.substring(0, 80) + '…' : text;
   }
+}
+
+// Hint Dialog Component
+@Component({
+  selector: 'app-hint-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatListModule, MatButtonModule, MatIconModule, NgFor],
+  template: `
+    <h2 mat-dialog-title>
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">lightbulb</mat-icon>
+      Hint: Key Topics
+    </h2>
+    <mat-dialog-content>
+      <p style="margin-bottom: 16px; color: #666;">
+        These are the key concepts to include in your answer:
+      </p>
+      <mat-list>
+        <mat-list-item *ngFor="let keyword of data.keywords" style="border-left: 3px solid #a3ff00; margin-bottom: 8px; padding-left: 12px;">
+          <mat-icon matListItemIcon style="color: #4CAF50;">check_circle</mat-icon>
+          <div matListItemTitle style="font-weight: 500;">{{ keyword }}</div>
+        </mat-list-item>
+      </mat-list>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    mat-dialog-content {
+      min-width: 400px;
+      padding: 20px;
+    }
+    mat-list {
+      padding: 0;
+    }
+    mat-list-item {
+      margin-bottom: 8px;
+      height: auto !important;
+      min-height: 48px;
+    }
+  `]
+})
+export class HintDialogComponent {
+  data = inject<any>(MAT_DIALOG_DATA);
 }

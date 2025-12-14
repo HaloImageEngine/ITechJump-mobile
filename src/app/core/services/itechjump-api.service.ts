@@ -57,4 +57,13 @@ export class ItechjumpApiService {
     console.log('Payload:', payload);
     return this.http.post<any>(url, payload);
   }
+
+  /**
+   * Get keywords/hints for a specific question.
+   * GET: https://techinterviewjump.com/api/ITechJump/Tech/GetKeywordbyQID?qid={qid}
+   */
+  getKeywordsByQuestionId(questionId: number): Observable<any[]> {
+    const url = `${this.baseUrl}/Tech/GetKeywordbyQID?qid=${questionId}`;
+    return this.http.get<any[]>(url);
+  }
 }
