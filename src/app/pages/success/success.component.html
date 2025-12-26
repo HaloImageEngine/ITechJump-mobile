@@ -1,0 +1,34 @@
+<div class="success-page">
+	<mat-card class="success-card">
+		<h1>Payment successful</h1>
+
+		<p>
+			Thank you for subscribing to ITechJump. Your payment was processed
+			securely by Stripe.
+		</p>
+
+		<p *ngIf="sessionId() as id">
+			<small>
+				Stripe session id:
+				<strong>{{ id }}</strong>
+			</small>
+		</p>
+
+		<div class="actions">
+			<button mat-raised-button color="primary" (click)="goToAccount()">
+				Continue
+			</button>
+			<button mat-button (click)="goToMain()">
+				Back to Main Page
+			</button>
+		</div>
+
+		<p class="note">
+			<small>
+				You can close this page or continue exploring your interview
+				practice.
+			</small>
+		</p>
+	</mat-card>
+</div>
+

@@ -1,1 +1,75 @@
-<p>review works!</p>
+<div class="review-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>My Test Results</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Loading spinner -->
+      <div *ngIf="loading()" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Loading test results...</p>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="error()" class="error-message">
+        <mat-icon>error</mat-icon>
+        <p>{{ error() }}</p>
+      </div>
+
+      <!-- Results table -->
+      <div *ngIf="!loading() && !error()" class="table-container">
+        <table mat-table [dataSource]="testResults()" class="results-table">
+          <!-- ID Column -->
+          <ng-container matColumnDef="AnswerResponseId">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let result">{{ result.AnswerResponseId }}</td>
+          </ng-container>
+
+          <!-- Question Column -->
+          <ng-container matColumnDef="QuestionShort">
+            <th mat-header-cell *matHeaderCellDef>Question</th>
+            <td mat-cell *matCellDef="let result">{{ result.QuestionShort }}</td>
+          </ng-container>
+
+          <!-- Answer Column -->
+          <ng-container matColumnDef="AnswerShort">
+            <th mat-header-cell *matHeaderCellDef>Answer</th>
+            <td mat-cell *matCellDef="let result">{{ result.AnswerShort }}</td>
+          </ng-container>
+
+          <!-- Score Column -->
+          <ng-container matColumnDef="Score">
+            <th mat-header-cell *matHeaderCellDef>Score</th>
+            <td mat-cell *matCellDef="let result">
+              <span class="score-badge" [class.score-high]="+result.Score >= 70"
+                    [class.score-medium]="+result.Score >= 40 && +result.Score < 70"
+                    [class.score-low]="+result.Score < 40">
+                {{ result.Score }}%
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let result">
+              <button mat-raised-button color="primary" (click)="viewDetail(result.AnswerResponseId)">
+                <mat-icon>visibility</mat-icon>
+                Detail
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- No results message -->
+        <div *ngIf="testResults().length === 0" class="no-results">
+          <mat-icon>inbox</mat-icon>
+          <p>No test results found. Take a test to see your results here!</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,122 @@
+<div class="review-detail-container">
+  <!-- Loading spinner -->
+  <div *ngIf="loading()" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading test details...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error()" class="error-message">
+    <mat-icon>error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Results
+    </button>
+  </div>
+
+  <!-- Test Detail Content -->
+  <div *ngIf="!loading() && !error() && testDetail()" class="detail-content">
+    <!-- Header Card -->
+    <mat-card class="header-card">
+      <mat-card-header>
+        <mat-card-title>Test Result Detail</mat-card-title>
+        <button mat-raised-button color="primary" (click)="goBack()" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+          Back to Results
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Test ID:</span>
+            <span class="info-value">{{ testDetail()!.AnswerResponseId }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Question ID:</span>
+            <span class="info-value">{{ testDetail()!.QuestionID }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Score:</span>
+            <span class="score-badge"
+                  [class.score-high]="testDetail()!.Score >= 70"
+                  [class.score-medium]="testDetail()!.Score >= 40 && testDetail()!.Score < 70"
+                  [class.score-low]="testDetail()!.Score < 40">
+              {{ testDetail()!.Score }}%
+            </span>
+          </div>
+          <div class="info-item full-width">
+            <span class="info-label">Score Details:</span>
+            <span class="info-value">{{ testDetail()!.ScoreDesc }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Question Card -->
+    <mat-card class="question-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>question_answer</mat-icon>
+          Question
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Question</mat-label>
+          <textarea
+            matInput
+            [value]="testDetail()!.QuestionFull"
+            rows="6"
+            readonly
+            title="Question Text">
+          </textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- User Answer Card -->
+    <mat-card class="user-answer-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon>
+          Your Answer
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Your Answer</mat-label>
+          <textarea
+            matInput
+            [value]="testDetail()!.AnswerUser"
+            rows="8"
+            readonly
+            title="User Answer">
+          </textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Model Answer Card -->
+    <mat-card class="model-answer-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>check_circle</mat-icon>
+          Model Answer
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Model Answer</mat-label>
+          <textarea
+            matInput
+            [value]="testDetail()!.AnswerFull"
+            rows="15"
+            readonly
+            title="Model Answer">
+          </textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

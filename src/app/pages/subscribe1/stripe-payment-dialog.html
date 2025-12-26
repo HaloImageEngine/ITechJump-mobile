@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>Complete Payment</h2>
+<mat-dialog-content>
+  <div class="payment-info">
+    <p><strong>Plan:</strong> {{ data.plan.PlanName }}</p>
+    <p><strong>Price:</strong> ${{ data.plan.Price.toFixed(2) }} / {{ data.plan.BillingPeriod }}</p>
+  </div>
+
+  <div class="card-element-container">
+    <div id="card-element"></div>
+    <div id="card-errors" role="alert"></div>
+  </div>
+
+  <div *ngIf="processing()" class="processing">
+    <mat-spinner diameter="30"></mat-spinner>
+    <p>Processing payment...</p>
+  </div>
+
+  <div *ngIf="errorMessage()" class="error-message">
+    {{ errorMessage() }}
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="processing()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="handlePayment()" [disabled]="processing()">
+    Pay ${{ data.plan.Price.toFixed(2) }}
+  </button>
+</mat-dialog-actions>

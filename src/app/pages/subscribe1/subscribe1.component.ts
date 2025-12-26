@@ -1,6 +1,6 @@
 // src/app/subscribe1/subscribe1.component.ts
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, Inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
@@ -8,7 +8,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { environment } from '../../../environments/environment';
+import { ItechjumpApiService } from '../../core/services/itechjump-api.service';
 
 type MatColor = 'primary' | 'accent' | 'warn';
 
@@ -86,12 +91,14 @@ function getUserAuthFromCookie(): any | null {
     MatCardModule,
     MatDividerModule,
     MatButtonModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDialogModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './subscribe1.component.html',
   styleUrls: ['./subscribe1.component.scss']
 })
-export class Subscribe1Component {
+export class Subscribe1Component implements OnInit {
   // Responsive flags
   isSmDown = signal(false);
   isMdDown = signal(false);
@@ -114,6 +121,29 @@ export class Subscribe1Component {
   userId = this.cookieAuthData?.userId ||
            this.cookieAuthData?.UserId ||
            extractUserId(this.storageUser);
+
+  // Get userEmail from ljUserDisplay cookie or localStorage display objects
+  userEmail: string = (() => {
+    try {
+      let email = '';
+
+      // 1) Try ljUserDisplay cookie
+      const displayCookie = getCookie('ljUserDisplay');
+      if (displayCookie) {
+        const displayData = JSON.parse(displayCookie);
+        email = displayData.email || '';
+      }
+
+      // 2) Fallback to storageUser (itechjumpUserDisplay / techjumpUserDisplay)
+      if (!email && this.storageUser) {
+        email = this.storageUser.email || '';
+      }
+
+      return email || '';
+    } catch {
+      return '';
+    }
+  })();
 
   // ITechJump plans
   PLANS: Plan[] = [
@@ -164,6 +194,10 @@ export class Subscribe1Component {
     }
   ];
 
+  private stripe: Stripe | null = null;
+  private dialog = inject(MatDialog);
+  private api = inject(ItechjumpApiService);
+
   constructor(
     private router: Router,
     private breakpointObserver: BreakpointObserver,
@@ -184,6 +218,14 @@ export class Subscribe1Component {
     console.log('Final userId:', this.userId, 'type:', typeof this.userId);
     console.log('Final alias:', this.alias, 'type:', typeof this.alias);
     console.log('=== END DEBUG ===');
+  }
+
+  async ngOnInit() {
+    // Initialize Stripe
+    this.stripe = await loadStripe(environment.stripePublishableKey);
+    if (!this.stripe) {
+      console.error('Failed to load Stripe');
+    }
   }
 
   private setupBreakpoints() {
@@ -290,81 +332,302 @@ export class Subscribe1Component {
   }
 
   choosePlan(plan: Plan) {
-    // Prepare subscription payload
-    const payload = {
-      UserId: this.userId,
-      UserAlias: this.hasRealAlias ? this.alias : '',
-      PlanCode: plan.PlanCode
-    };
+    // Skip payment for free plan
+    if (plan.Price <= 0) {
+      this.createFreeSubscription(plan);
+      return;
+    }
 
-    console.log('Submitting subscription:', payload);
-    console.log('UserId type:', typeof this.userId, 'value:', this.userId);
-    console.log('UserAlias type:', typeof this.alias, 'value:', this.alias);
+    // Hosted Stripe Checkout for paid plans
+    console.log('Starting hosted Stripe Checkout for plan:', plan.PlanCode);
 
-    // Add headers for JSON content
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    });
-
-    // Make API call directly to avoid proxy issues (note: uppercase 'ITechjumpsubscription')
-    this.http
-      .post<any>('https://techinterviewjump.com/api/ITechjumpsubscription', payload, { headers })
+    this.api
+      .createCheckoutSession({
+        userId: this.userId || 0,
+        userAlias: this.hasRealAlias ? this.alias : '',
+        planCode: plan.PlanCode,
+        userEmail: this.userEmail
+      })
       .subscribe({
-        next: (response) => {
-          console.log('Subscription response:', response);
+        next: async (session) => {
+          console.log('Checkout Session created (raw):', session);
 
-          // Set subscription cookie with plan details
-          this.setSubscriptionCookie(plan.PlanCode, plan.BillingPeriod);
-
-          // If API returns SubscriptionId, update the cookie
-          const subscriptionId = response?.subscription?.SubscriptionId || response?.SubscriptionId;
-          if (subscriptionId) {
+          // Support multiple possible shapes from backend and also
+          // handle the case where backend returns JSON as a string.
+          let anySession: any = session as any;
+          if (typeof anySession === 'string') {
             try {
-              const cookieValue = getCookie('itechjumpSubscription');
-              if (cookieValue) {
-                const subData = JSON.parse(cookieValue);
-                subData.subscriptionId = subscriptionId;
-                this.setCookie('itechjumpSubscription', JSON.stringify(subData), 365);
-                console.log('Updated subscription cookie with SubscriptionId:', subscriptionId);
-              }
-            } catch (err) {
-              console.error('Error updating subscription cookie:', err);
+              anySession = JSON.parse(anySession);
+              console.log('Parsed string session JSON:', anySession);
+            } catch (e) {
+              console.error('Failed to parse session string as JSON:', e);
             }
           }
 
-          // Show success message
-          this.snackBar.open('Subscription successful!', undefined, {
-            duration: 2000,
-            verticalPosition: 'bottom',
-            horizontalPosition: 'center',
-            panelClass: ['success-snack']
-          });
+          // If backend indicates failure explicitly, surface message and stop.
+          if (anySession.ok === false) {
+            const msg =
+              anySession.error ||
+              anySession.message ||
+              'Payment session could not be created. Please try again.';
+            console.error('Checkout session not ok:', anySession);
+            this.snackBar.open(msg, 'Close', { duration: 4000 });
+            return;
+          }
 
-          // Redirect to subscribe2 component with query params
-          this.router.navigate(['/subscribe2'], {
-            queryParams: {
-              planCode: plan.PlanCode,
-              userId: this.userId,
-              userAlias: this.hasRealAlias ? this.alias : ''
-            }
-          });
+          const sessionUrl: string | undefined = anySession.url || anySession.checkoutUrl;
+          const sessionId: string | undefined =
+            anySession.id || anySession.sessionId || anySession.checkoutSessionId;
+
+          // If backend returns a direct URL, use it
+          if (sessionUrl) {
+            console.log('Redirecting to Checkout URL:', sessionUrl);
+            window.location.href = sessionUrl;
+            return;
+          }
+
+          // Otherwise, use Stripe.js redirectToCheckout with sessionId
+          if (!sessionId) {
+            console.error('No session URL or sessionId returned from backend:', anySession);
+            this.snackBar.open('Payment session could not be created. Please try again.', 'Close', {
+              duration: 4000
+            });
+            return;
+          }
+
+          const stripeInstance = await loadStripe(environment.stripePublishableKey);
+          if (!stripeInstance) {
+            console.error('Failed to load Stripe for redirectToCheckout');
+            this.snackBar.open('Unable to open payment page. Please try again.', 'Close', {
+              duration: 4000
+            });
+            return;
+          }
+
+          // Cast to any to avoid type conflicts if multiple Stripe typings are present
+          const { error } = await (stripeInstance as any).redirectToCheckout({ sessionId });
+          if (error) {
+            console.error('redirectToCheckout error:', error);
+            this.snackBar.open(error.message || 'Redirect to payment failed.', 'Close', {
+              duration: 4000
+            });
+          }
         },
-        error: (error) => {
-          console.error('Subscription error:', error);
-
-          // Show error message
-          this.snackBar.open(
-            error?.error?.message || 'Subscription failed. Please try again.',
-            'Close',
-            {
-              duration: 4000,
-              verticalPosition: 'bottom',
-              horizontalPosition: 'center',
-              panelClass: ['error-snack']
-            }
-          );
+        error: (err) => {
+          console.error('createCheckoutSession error:', err);
+          this.snackBar.open('Unable to start checkout. Please try again.', 'Close', {
+            duration: 4000
+          });
         }
       });
+  }
+
+  private createFreeSubscription(plan: Plan) {
+    const payload = {
+      UserId: this.userId || 0,
+      UserAlias: this.hasRealAlias ? this.alias : '',
+      PlanCode: plan.PlanCode,
+      StripePaymentIntentId: '',
+      StripeChargeId: '',
+      StripeCustomerId: '',
+      StripePaymentMethodId: ''
+    };
+
+    this.api.createSubscription(payload).subscribe({
+      next: (response) => {
+        console.log('Free subscription response:', response);
+        this.setSubscriptionCookie(plan.PlanCode, plan.BillingPeriod);
+
+        this.snackBar.open('Free plan activated!', undefined, {
+          duration: 2000,
+          verticalPosition: 'bottom',
+          horizontalPosition: 'center'
+        });
+
+        this.router.navigate(['/subscribe2'], {
+          queryParams: {
+            planCode: plan.PlanCode,
+            userId: this.userId,
+            userAlias: this.hasRealAlias ? this.alias : ''
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Free subscription error:', error);
+        this.snackBar.open('Failed to activate free plan. Please try again.', 'Close', {
+          duration: 4000
+        });
+      }
+    });
+  }
+}
+
+// Stripe Payment Dialog Component
+@Component({
+  selector: 'app-stripe-payment-dialog',
+  standalone: true,
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatProgressSpinnerModule],
+  templateUrl: './stripe-payment-dialog.html',
+  styles: [`
+    .payment-info {
+      margin-bottom: 20px;
+      padding: 16px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+    .card-element-container {
+      margin: 20px 0;
+    }
+    #card-element {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 12px;
+      background-color: white;
+    }
+    #card-errors {
+      color: #f44336;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .processing {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      color: #666;
+    }
+    .error-message {
+      color: #f44336;
+      margin-top: 12px;
+      padding: 12px;
+      background-color: #ffebee;
+      border-radius: 4px;
+    }
+  `]
+})
+export class StripePaymentDialogComponent implements OnInit {
+  processing = signal(false);
+  errorMessage = signal<string | null>(null);
+
+  private stripe: Stripe | null = null;
+  private cardElement: StripeCardElement | null = null;
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialogRef: MatDialogRef<StripePaymentDialogComponent>,
+    private api: ItechjumpApiService
+  ) {}
+
+  async ngOnInit() {
+    // Initialize Stripe
+    this.stripe = await loadStripe(environment.stripePublishableKey);
+    if (!this.stripe) {
+      this.errorMessage.set('Failed to load payment system');
+      return;
+    }
+
+    // Create Stripe Elements
+    const elements = this.stripe.elements();
+    this.cardElement = elements.create('card', {
+      style: {
+        base: {
+          fontSize: '16px',
+          color: '#32325d',
+          fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+          '::placeholder': {
+            color: '#aab7c4'
+          }
+        },
+        invalid: {
+          color: '#fa755a',
+          iconColor: '#fa755a'
+        }
+      }
+    });
+
+    // Mount card element
+    this.cardElement.mount('#card-element');
+
+    // Handle real-time validation errors
+    this.cardElement.on('change', (event) => {
+      const displayError = document.getElementById('card-errors');
+      if (displayError) {
+        displayError.textContent = event.error ? event.error.message : '';
+      }
+    });
+  }
+
+  async handlePayment() {
+    if (!this.stripe || !this.cardElement) {
+      this.errorMessage.set('Payment system not initialized');
+      return;
+    }
+
+    this.processing.set(true);
+    this.errorMessage.set(null);
+
+    try {
+      // Step 1: Create a PaymentMethod from the card details
+      const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+        type: 'card',
+        card: this.cardElement,
+        billing_details: {
+          name: this.data.userAlias || 'Customer'
+        }
+      });
+
+      if (error || !paymentMethod) {
+        this.errorMessage.set(error?.message || 'Failed to create payment method');
+        this.processing.set(false);
+        return;
+      }
+
+      const paymentMethodId = paymentMethod.id;
+      console.log('Payment method created:', paymentMethodId);
+
+      // Step 2: Call backend consolidated Stripe payment endpoint
+      const payload = {
+        UserId: this.data.userId || 0,
+        UserAlias: this.data.userAlias || '',
+        PlanCode: this.data.plan.PlanCode,
+        StripePaymentIntentId: '',
+        StripeChargeId: '',
+        StripeCustomerId: '',
+        StripePaymentMethodId: paymentMethodId
+      };
+
+      console.log('Calling CallStripePayment with payload JSON:', JSON.stringify(payload, null, 2));
+
+      this.api.callStripePayment(payload).subscribe({
+        next: (response) => {
+          console.log('stripe/call-payment response:', response);
+
+          // Backend may return { ok: false, ... } for non-succeeded statuses
+          if (response && response.ok === false) {
+            const msg =
+              response.error ||
+              response.status ||
+              'Payment failed. Please verify your card and try again.';
+            this.errorMessage.set(msg);
+            this.processing.set(false);
+            return;
+          }
+
+          this.processing.set(false);
+          this.dialogRef.close({ success: true, response });
+        },
+        error: (err) => {
+          console.error('stripe/call-payment error:', err);
+          const msg = err?.error?.error || err?.error?.message || 'Payment processing failed';
+          this.errorMessage.set(msg);
+          this.processing.set(false);
+        }
+      });
+
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      this.errorMessage.set(err.message || 'Payment processing failed');
+      this.processing.set(false);
+    }
   }
 }

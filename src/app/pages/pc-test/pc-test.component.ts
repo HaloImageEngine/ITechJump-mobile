@@ -15,6 +15,7 @@ import { MatDialog, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/d
 import { MatListModule } from '@angular/material/list';
 
 import { ItechjumpApiService } from '../../core/services/itechjump-api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CategoryDto } from '../../core/models/category-dto';
 import { QuestionDto } from '../../core/models/question-dto';
 
@@ -68,7 +69,8 @@ export class PcTestComponent {
 
   constructor(
     private api: ItechjumpApiService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {
     // load categories on init
     this.loadCategories();
@@ -172,19 +174,31 @@ export class PcTestComponent {
 
   onSubmitAnswer(): void {
     const questionId = this.selectedQuestionId();
+    const category = this.selectedCategory();
     const answer = this.userAnswer.trim();
 
-    if (!answer || !questionId) {
+    if (!answer || !questionId || !category) {
       return;
     }
 
+    // Get userId from AuthService, fallback to cookie, then default to "1019"
+    let userId = this.authService.getUserId();
+    if (!userId) {
+      userId = this.authService.getUserIdFromCookie();
+    }
+    if (!userId) {
+      userId = "1019"; // Default fallback
+    }
+
     console.log('Submitting answer for question ID:', questionId);
+    console.log('Category:', category);
+    console.log('User ID:', userId);
     console.log('User answer:', answer);
 
     this.submittingAnswer.set(true);
     this.error.set(null);
 
-    this.api.submitAnswer(questionId, answer).subscribe({
+    this.api.submitAnswer(questionId, userId, category, answer).subscribe({
       next: (response) => {
         console.log('Answer submitted successfully', response);
         this.gradeResponse.set(response);

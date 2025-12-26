@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { NavComponent } from '../nav/nav.component';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -13,6 +14,7 @@ import { environment } from '../../../environments/environment';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   // Auth state
   isLoggedIn = false;
@@ -97,9 +99,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
         console.log('Parsed authData:', authData);
         this.userId = authData?.userId || authData?.UserId || null;
         console.log('Extracted userId:', this.userId, 'type:', typeof this.userId);
+        // Update AuthService with userId
+        this.authService.setUserId(this.userId);
       } else {
         this.userId = null;
         console.log('No authCookie found, userId set to null');
+        this.authService.setUserId(null);
       }
     } catch (err) {
       console.error('Error parsing ljUserAuth cookie:', err);

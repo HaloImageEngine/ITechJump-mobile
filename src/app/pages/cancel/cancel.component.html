@@ -1,0 +1,25 @@
+<div class="cancel-page">
+	<mat-card class="cancel-card">
+		<h1>Payment canceled</h1>
+
+		<p>
+			Your Stripe checkout session was canceled before completion. No charges
+			were made.
+		</p>
+
+		<p>
+			You can return to the subscription page to choose a plan again, or go
+			back to the main page.
+		</p>
+
+		<div class="actions">
+			<button mat-raised-button color="primary" (click)="retry()">
+				Back to Subscription Plans
+			</button>
+			<button mat-button (click)="goToMain()">
+				Back to Main Page
+			</button>
+		</div>
+	</mat-card>
+</div>
+
