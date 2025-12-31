@@ -28,6 +28,13 @@
       </p>
     </div>
 
+    <!-- Debug/user context: show current user details -->
+    <section class="user-context">
+      <p><strong>UserId:</strong> {{ userId }}</p>
+      <p><strong>UserAlias:</strong> {{ alias }}</p>
+      <p><strong>UserEmail:</strong> {{ userEmail || 'N/A' }}</p>
+    </section>
+
     <!-- Why subscribe text -->
     <section class="why-section">
       <h3>Why subscribe and save your answers?</h3>
@@ -46,91 +53,123 @@
     </section>
 
     <mat-divider class="divider"></mat-divider>
+    <!-- Loading state for plans -->
+    <section *ngIf="isLoadingPlans" class="plans-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading subscription plans...</p>
+    </section>
 
-    <!-- Mobile layout: stacked cards with chips -->
-    <ng-container *ngIf="isSmDown(); else desktopView">
-      <section class="plans-mobile">
-        <mat-card
-          class="plan-card"
-          *ngFor="let p of PLANS"
-          appearance="outlined"
-        >
-          <div class="plan-card-header">
-            <mat-chip
-              class="plan-chip"
-              [color]="planColor(p.PlanCode)"
-              selected
-              (click)="choosePlan(p)"
-            >
-              {{ p.PlanCode }}
-            </mat-chip>
+    <!-- Error state for plans -->
+    <section *ngIf="!isLoadingPlans && loadPlansError" class="plans-error">
+      <p>{{ loadPlansError }}</p>
+      <button mat-raised-button color="primary" (click)="retryLoadPlans()">
+        Retry
+      </button>
+    </section>
 
-            <div class="plan-name">
-              <span class="plan-name-main">{{ p.PlanName }}</span>
-              <span class="plan-billing">
-                {{ fmtBilling(p) }}
+    <!-- Plans grid/table -->
+    <section *ngIf="!isLoadingPlans && !loadPlansError">
+      <p *ngIf="!PLANS.length" class="no-plans-message">
+        No subscription plans are currently available. Please check back later.
+      </p>
+
+      <!-- Mobile layout: stacked cards with chips -->
+      <ng-container *ngIf="isSmDown(); else desktopView">
+        <section class="plans-mobile">
+          <mat-card
+            class="plan-card"
+            *ngFor="let p of PLANS"
+            appearance="outlined"
+          >
+            <div class="plan-card-header">
+              <span
+                matTooltip="{{ !isUserContextValid() ? getUserContextInvalidMessage() : '' }}"
+                [matTooltipDisabled]="isUserContextValid()"
+              >
+                <mat-chip
+                  class="plan-chip"
+                  [color]="planColor(p.PlanCode)"
+                  selected
+                  [disabled]="!isUserContextValid()"
+                  (click)="choosePlan(p)"
+                >
+                  {{ p.PlanCode }}
+                </mat-chip>
+              </span>
+
+              <div class="plan-name">
+                <span class="plan-name-main">{{ p.PlanName }}</span>
+                <span class="plan-billing">
+                  {{ fmtBilling(p) }}
+                </span>
+              </div>
+            </div>
+
+            <p class="plan-description">
+              {{ p.Description }}
+            </p>
+
+            <div class="plan-footer">
+              <span class="plan-price">
+                <strong>Price:</strong> {{ fmtPrice(p) }}
               </span>
             </div>
+          </mat-card>
+        </section>
+      </ng-container>
+
+      <!-- Desktop / tablet layout: table -->
+      <ng-template #desktopView>
+        <section class="plans-table-wrapper">
+          <div class="plans-table-container">
+            <table class="plans-table" aria-label="ITechJump subscription plans">
+              <thead>
+                <tr>
+                  <th class="col-plan">Plan</th>
+                  <th class="col-name">PlanName</th>
+                  <th class="col-desc">Description</th>
+                  <th class="col-price">Price</th>
+                  <th class="col-billing">Billing</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of PLANS" class="plan-row">
+                  <td class="col-plan">
+                    <span
+                      matTooltip="{{ !isUserContextValid() ? getUserContextInvalidMessage() : '' }}"
+                      [matTooltipDisabled]="isUserContextValid()"
+                    >
+                      <button
+                        mat-raised-button
+                        [color]="planColor(p.PlanCode)"
+                        [ngClass]="{ 'btn-small': isMdDown() }"
+                        [disabled]="!isUserContextValid()"
+                        (click)="choosePlan(p)"
+                        [attr.aria-label]="'Select ' + p.PlanCode"
+                      >
+                        {{ p.PlanCode }}
+                      </button>
+                    </span>
+                  </td>
+                  <td class="col-name">
+                    {{ p.PlanName }}
+                  </td>
+                  <td class="col-desc">
+                    {{ p.Description }}
+                  </td>
+                  <td class="col-price">
+                    {{ fmtPrice(p) }}
+                  </td>
+                  <td class="col-billing">
+                    {{ fmtBilling(p) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-
-          <p class="plan-description">
-            {{ p.Description }}
-          </p>
-
-          <div class="plan-footer">
-            <span class="plan-price">
-              <strong>Price:</strong> {{ fmtPrice(p) }}
-            </span>
-          </div>
-        </mat-card>
-      </section>
-    </ng-container>
-
-    <!-- Desktop / tablet layout: table -->
-    <ng-template #desktopView>
-      <section class="plans-table-wrapper">
-        <div class="plans-table-container">
-          <table class="plans-table" aria-label="ITechJump subscription plans">
-            <thead>
-              <tr>
-                <th class="col-plan">Plan</th>
-                <th class="col-name">PlanName</th>
-                <th class="col-desc">Description</th>
-                <th class="col-price">Price</th>
-                <th class="col-billing">Billing</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of PLANS" class="plan-row">
-                <td class="col-plan">
-                  <button
-                    mat-raised-button
-                    [color]="planColor(p.PlanCode)"
-                    [ngClass]="{ 'btn-small': isMdDown() }"
-                    (click)="choosePlan(p)"
-                    [attr.aria-label]="'Select ' + p.PlanCode"
-                  >
-                    {{ p.PlanCode }}
-                  </button>
-                </td>
-                <td class="col-name">
-                  {{ p.PlanName }}
-                </td>
-                <td class="col-desc">
-                  {{ p.Description }}
-                </td>
-                <td class="col-price">
-                  {{ fmtPrice(p) }}
-                </td>
-                <td class="col-billing">
-                  {{ fmtBilling(p) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </ng-template>
+        </section>
+      </ng-template>
+    </section>
 
     <!-- Footnote -->
     <section class="footnote">

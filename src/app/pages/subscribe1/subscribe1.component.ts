@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,12 +19,21 @@ import { ItechjumpApiService } from '../../core/services/itechjump-api.service';
 type MatColor = 'primary' | 'accent' | 'warn';
 
 interface Plan {
+  // Core display fields used in the grid
   PlanCode: string;
   PlanName: string;
   Description: string;
   Price: number;
   Currency: string;
   BillingPeriod: 'Monthly' | 'Yearly' | string;
+
+  // Fields coming from the Stripe products API
+  ProductID?: number;
+  StripeProductId?: string;
+  StripePriceId?: string;
+  ProductTaxCode?: string;
+  BillingInterval?: string;
+  IsActive?: boolean;
 }
 
 /** Fallback userId when not present */
@@ -92,6 +102,7 @@ function getUserAuthFromCookie(): any | null {
     MatDividerModule,
     MatButtonModule,
     MatChipsModule,
+    MatTooltipModule,
     MatDialogModule,
     MatProgressSpinnerModule
   ],
@@ -122,7 +133,7 @@ export class Subscribe1Component implements OnInit {
            this.cookieAuthData?.UserId ||
            extractUserId(this.storageUser);
 
-  // Get userEmail from ljUserDisplay cookie or localStorage display objects
+  // Get userEmail from cookies/localStorage and validate basic email shape
   userEmail: string = (() => {
     try {
       let email = '';
@@ -139,60 +150,34 @@ export class Subscribe1Component implements OnInit {
         email = this.storageUser.email || '';
       }
 
-      return email || '';
+      // 3) Fallback to a generic useremail cookie if present
+      if (!email) {
+        const emailCookie = getCookie('useremail');
+        if (emailCookie) {
+          email = emailCookie;
+        }
+      }
+
+      email = (email || '').trim();
+
+      // Very basic email validation: must contain "@" and a dot after it
+      const simpleEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!simpleEmailRegex.test(email)) {
+        return '';
+      }
+
+      return email;
     } catch {
       return '';
     }
   })();
 
-  // ITechJump plans
-  PLANS: Plan[] = [
-    {
-      PlanCode: 'BASIC-MONTH',
-      PlanName: 'Basic',
-      Description:
-        'Saves answers and scores. Unlocks bonus questions and voice features.',
-      Price: 9.99,
-      Currency: 'USD',
-      BillingPeriod: 'Monthly'
-    },
-    {
-      PlanCode: 'BASIC-YEAR',
-      PlanName: 'BasicLT',
-      Description:
-        'Annual Basic Plan with discounted pricing. Includes saving answers/scores and bonus questions.',
-      Price: 59.0,
-      Currency: 'USD',
-      BillingPeriod: 'Yearly'
-    },
-    {
-      PlanCode: 'FREE-MONTH',
-      PlanName: 'Free',
-      Description:
-        'Access to core questions and testing features. Answers/scores are not saved.',
-      Price: 0.0,
-      Currency: 'USD',
-      BillingPeriod: 'Monthly'
-    },
-    {
-      PlanCode: 'PRO-MONTH',
-      PlanName: 'ProSenior',
-      Description:
-        'Full feature set including advanced analytics, voice mode, and bonus content.',
-      Price: 19.99,
-      Currency: 'USD',
-      BillingPeriod: 'Monthly'
-    },
-    {
-      PlanCode: 'PRO-YEAR',
-      PlanName: 'ProYear',
-      Description:
-        'Annual Pro plan with full features: advanced analytics, bonus questions, and voice mode.',
-      Price: 79.99,
-      Currency: 'USD',
-      BillingPeriod: 'Yearly'
-    }
-  ];
+  // ITechJump plans loaded dynamically from REST API
+  PLANS: Plan[] = [];
+
+  // UI state for loading/error when fetching plans
+  isLoadingPlans = false;
+  loadPlansError: string | null = null;
 
   private stripe: Stripe | null = null;
   private dialog = inject(MatDialog);
@@ -226,6 +211,119 @@ export class Subscribe1Component implements OnInit {
     if (!this.stripe) {
       console.error('Failed to load Stripe');
     }
+
+    // Load subscription plans from backend
+    this.loadYearlyPlans();
+  }
+
+  // ---- User context validation helpers ----
+
+  private isUserIdValid(): boolean {
+    const n = Number(this.userId);
+    return Number.isInteger(n) && n > 0;
+  }
+
+  private isAliasValid(): boolean {
+    const a = (this.alias || '').trim();
+    const len = a.length;
+    return len > 6 && len < 20;
+  }
+
+  /**
+   * User context is valid only if we have a numeric userId, a
+   * reasonably sized alias, and a validated non-empty userEmail.
+   */
+  isUserContextValid(): boolean {
+    return this.isUserIdValid() && this.isAliasValid() && !!this.userEmail;
+  }
+
+  /**
+   * Human-readable explanation of why the user context is invalid,
+   * used for hover tooltips on disabled plan buttons.
+   */
+  getUserContextInvalidMessage(): string {
+    const reasons: string[] = [];
+
+    if (!this.isUserIdValid()) {
+      reasons.push('UserId must be a positive whole number.');
+    }
+
+    if (!this.isAliasValid()) {
+      reasons.push('UserAlias must be between 7 and 19 characters.');
+    }
+
+    if (!this.userEmail) {
+      reasons.push('UserEmail must be a valid email address.');
+    }
+
+    if (!reasons.length) {
+      return 'Please complete your registration before choosing a plan.';
+    }
+
+    return reasons.join(' ');
+  }
+
+  /**
+   * Load subscription products for yearly billing interval from REST API
+   * and map them into the local Plan[] used by the template.
+   */
+  private loadYearlyPlans() {
+    this.isLoadingPlans = true;
+    this.loadPlansError = null;
+
+    const url =
+      'https://techinterviewjump.com/api/ITechJump/stripe/GetProductYearly?BillingInterval=year';
+
+    this.http.get<any[]>(url).subscribe({
+      next: (products) => {
+        if (!Array.isArray(products)) {
+          console.error('Unexpected plans payload (not an array):', products);
+          return;
+        }
+
+        this.PLANS = products
+          .filter((p) => p && (p.IsActive === undefined || p.IsActive === true))
+          .map((p): Plan => {
+            const intervalRaw = String(p.BillingInterval || '').toLowerCase();
+            let billingPeriod: 'Monthly' | 'Yearly' | string = p.BillingInterval || '';
+            if (intervalRaw === 'year' || intervalRaw === 'yearly') {
+              billingPeriod = 'Yearly';
+            } else if (intervalRaw === 'month' || intervalRaw === 'monthly') {
+              billingPeriod = 'Monthly';
+            }
+
+            return {
+              PlanCode: p.PlanCode,
+              PlanName: p.ProductName,
+              Description: p.ProductDescription,
+              Price: p.Price,
+              Currency: p.Currency || 'USD',
+              BillingPeriod: billingPeriod,
+              ProductID: p.ProductID,
+              StripeProductId: p.StripeProductId,
+              StripePriceId: p.StripePriceId,
+              ProductTaxCode: p.ProductTaxCode,
+              BillingInterval: p.BillingInterval,
+              IsActive: p.IsActive
+            };
+          });
+
+        console.log('Loaded subscription plans from API:', this.PLANS);
+        this.isLoadingPlans = false;
+      },
+      error: (err) => {
+        console.error('Failed to load subscription plans from API:', err);
+        this.isLoadingPlans = false;
+        this.loadPlansError = 'Unable to load subscription plans. Please check your connection and try again.';
+        this.snackBar.open('Unable to load subscription plans. Please try again later.', 'Close', {
+          duration: 4000
+        });
+      }
+    });
+  }
+
+  retryLoadPlans() {
+    this.loadYearlyPlans();
   }
 
   private setupBreakpoints() {
@@ -334,20 +432,70 @@ export class Subscribe1Component implements OnInit {
   choosePlan(plan: Plan) {
     // Skip payment for free plan
     if (plan.Price <= 0) {
+      // Even for free plans, require a valid user context so
+      // downstream subscription records are associated correctly.
+      if (!this.isUserContextValid()) {
+        console.error('Cannot activate free plan: user context is invalid', {
+          userId: this.userId,
+          alias: this.alias,
+          userEmail: this.userEmail
+        });
+        this.snackBar.open(
+          'Please complete your registration (valid UserId, alias, and email) before choosing a plan.',
+          'Close',
+          { duration: 6000 }
+        );
+        return;
+      }
+
       this.createFreeSubscription(plan);
+      return;
+    }
+
+    // Guard: require a StripePriceId for paid plans before calling backend
+    if (!plan.StripePriceId) {
+      console.error('Paid plan is missing StripePriceId:', plan);
+      this.snackBar.open(
+        'This plan is not yet configured for online checkout. Please choose another plan or try again later.',
+        'Close',
+        { duration: 5000 }
+      );
+      return;
+    }
+
+    // Guard: ensure the full user context is valid for paid checkout
+    if (!this.isUserContextValid()) {
+      console.error('Cannot start checkout: user context is invalid', {
+        userId: this.userId,
+        alias: this.alias,
+        userEmail: this.userEmail
+      });
+      this.snackBar.open(
+        'Please complete your registration (valid UserId, alias, and email) before starting payment.',
+        'Close',
+        { duration: 6000 }
+      );
       return;
     }
 
     // Hosted Stripe Checkout for paid plans
     console.log('Starting hosted Stripe Checkout for plan:', plan.PlanCode);
 
+    const checkoutPayload = {
+      userId: this.userId || 0,
+      userAlias: this.hasRealAlias ? this.alias : '',
+      userEmail: this.userEmail,
+      // Send the StripePriceId for this product to the backend (no hard-coded price ids)
+      planCode: plan.StripePriceId
+    };
+
+    console.log(
+      'Calling createCheckoutSession with payload JSON:',
+      JSON.stringify(checkoutPayload, null, 2)
+    );
+
     this.api
-      .createCheckoutSession({
-        userId: this.userId || 0,
-        userAlias: this.hasRealAlias ? this.alias : '',
-        planCode: plan.PlanCode,
-        userEmail: this.userEmail
-      })
+      .createCheckoutSession(checkoutPayload)
       .subscribe({
         next: async (session) => {
           console.log('Checkout Session created (raw):', session);

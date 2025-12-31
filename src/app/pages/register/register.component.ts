@@ -247,6 +247,9 @@ export class RegisterComponent {
     const input = event.target as HTMLInputElement;
     const z = this.digitsOnly(input.value).slice(0, 5);
     this.form.controls['zip'].setValue(z);
+    // Clear any previous city/state when zip changes so they are always
+    // derived from the latest lookup.
+    this.form.patchValue({ city: '', state: '' });
   }
 
   onAliasInput(event: Event) {
@@ -294,6 +297,39 @@ export class RegisterComponent {
     }
 
     this.form.controls['phoneNum'].setValue(display);
+  }
+
+  // When zip loses focus, call Zippopotam.us to look up city/state.
+  onZipBlur() {
+    const rawZip = (this.form.controls['zip'].value || '').toString().trim();
+    if (!rawZip || !/^\d{5}$/.test(rawZip)) {
+      return;
+    }
+
+    const url = `https://api.zippopotam.us/us/${rawZip}`;
+    this.http.get<any>(url).subscribe({
+      next: (res) => {
+        try {
+          const place = res?.places?.[0];
+          if (!place) {
+            return;
+          }
+
+          const city = (place['place name'] || '').toString();
+          const stateAbbr = (place['state abbreviation'] || '').toString().toUpperCase();
+
+          this.form.patchValue({
+            city,
+            state: stateAbbr
+          });
+        } catch (e) {
+          console.error('Error processing zip lookup response', e, res);
+        }
+      },
+      error: (err) => {
+        console.error('Zip lookup failed', err);
+      }
+    });
   }
 
   toggleShowPassword() {
@@ -425,6 +461,7 @@ export class RegisterComponent {
 
     // Debug logging
     console.log('Registration payload:', payload);
+    console.log('Sending JSON to create REST API:', JSON.stringify(payload, null, 2));
 
     this.http.post<any>(`${API_BASE}/api/Techjump/login/create`, payload).subscribe({
       next: (res) => {

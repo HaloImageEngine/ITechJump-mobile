@@ -127,13 +127,13 @@ export class ItechjumpApiService {
     userEmail?: string;
   }): Observable<{ ok?: boolean; id?: string; url?: string; checkoutUrl?: string; sessionId?: string; checkoutSessionId?: string }> {
     const url = `${this.baseUrl}/stripe/create-checkout-session`;
-    // For this testing phase, always send the Stripe price id
-    // as planCode, while keeping userId / userAlias / userEmail dynamic.
     const body = {
       userId: data.userId,
       userAlias: data.userAlias,
       userEmail: data.userEmail ?? '',
-      planCode: 'price_1SfkPPDZoJAP570SBuPSIsHf'
+      // Forward the planCode provided by the caller (typically the StripePriceId
+      // coming from the dynamic products API), avoiding any hard-coded price ids.
+      planCode: data.planCode
     };
     console.log('createCheckoutSession payload JSON:', JSON.stringify(body, null, 2));
     return this.http.post<{ ok?: boolean; id?: string; url?: string; checkoutUrl?: string; sessionId?: string; checkoutSessionId?: string }>(url, body);

@@ -27,6 +27,7 @@ const PERSISTENT_COOKIE_DAYS = 365 * 20;
 interface VerifyAliasResponse {
   ok?: boolean;
   userId?: number | string;
+  userEmail?: string;
   message?: string;
   error?: string;
   [key: string]: any;
@@ -284,6 +285,12 @@ export class LoginComponent {
     // Lowercase cookie name as in React: "useralias" (1 year)
     this.setCookie('useralias', aliasCookie, 365);
 
+    // Also store plain useremail cookie so other parts of the app
+    // (e.g., subscription flow) can read it directly when needed.
+    if (finalEmail) {
+      this.setCookie('useremail', finalEmail, 365);
+    }
+
     // UI-only cookie for header, etc.
     this.setUserDisplayCookie({
       alias: aliasCookie,
@@ -422,6 +429,7 @@ export class LoginComponent {
       this.logger.log('=== LOGIN API RESPONSE ===');
       this.logger.log('Full response:', data);
       this.logger.log('data.userId:', data?.userId, 'type:', typeof data?.userId);
+      this.logger.log('data.userEmail:', (data as any)?.userEmail, 'type:', typeof (data as any)?.userEmail);
       this.logger.log('data.ok:', data?.ok);
       this.logger.log('=== END LOGIN RESPONSE ===');
 
@@ -433,7 +441,12 @@ export class LoginComponent {
         return;
       }
 
-      this.doPostLoginUI(aliasToVerify, emailCookie, data.userId);
+      // Prefer any email returned by the backend (userEmail),
+      // but keep the email entered on the form when present.
+      const backendEmail = (data as any)?.userEmail || (data as any)?.email || null;
+      const effectiveEmail = emailCookie || backendEmail;
+
+      this.doPostLoginUI(aliasToVerify, effectiveEmail, data.userId);
     } catch (err: any) {
       console.error('Login error:', err);
       const status = err?.status;

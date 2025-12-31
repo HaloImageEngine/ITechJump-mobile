@@ -135,6 +135,23 @@
 
       <!-- Address row -->
       <div class="grid-row">
+        <mat-form-field appearance="outline" class="field flex-1">
+          <mat-label>Zip</mat-label>
+          <input
+            matInput
+            formControlName="zip"
+            autocomplete="postal-code"
+            inputmode="numeric"
+            maxlength="5"
+            (input)="onZipInput($event)"
+            (blur)="onZipBlur()"
+          />
+          <mat-hint>5 digits (auto-fills city/state)</mat-hint>
+          <mat-error *ngIf="f['zip'].touched && f['zip'].invalid">
+            {{ f['zip'].getError('zip') }}
+          </mat-error>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="field flex-2">
           <mat-label>City</mat-label>
           <input
@@ -156,22 +173,6 @@
           <mat-hint>State Code (e.g., TX)</mat-hint>
           <mat-error *ngIf="f['state'].touched && f['state'].invalid">
             {{ f['state'].getError('state') }}
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="field flex-1">
-          <mat-label>Zip</mat-label>
-          <input
-            matInput
-            formControlName="zip"
-            autocomplete="postal-code"
-            inputmode="numeric"
-            maxlength="5"
-            (input)="onZipInput($event)"
-          />
-          <mat-hint>Optional; 5 digits</mat-hint>
-          <mat-error *ngIf="f['zip'].touched && f['zip'].invalid">
-            {{ f['zip'].getError('zip') }}
           </mat-error>
         </mat-form-field>
       </div>
