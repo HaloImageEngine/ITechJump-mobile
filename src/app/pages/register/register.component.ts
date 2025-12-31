@@ -237,6 +237,31 @@ export class RegisterComponent {
     this.form.controls['middleInitial'].setValue(one);
   }
 
+  // --- Blur handlers for capitalizing names ---
+
+  onFirstNameBlur() {
+    const value = this.form.controls['firstName'].value || '';
+    if (value) {
+      const capitalized = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      this.form.controls['firstName'].setValue(capitalized);
+    }
+  }
+
+  onLastNameBlur() {
+    const value = this.form.controls['lastName'].value || '';
+    if (value) {
+      const capitalized = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      this.form.controls['lastName'].setValue(capitalized);
+    }
+  }
+
+  onMiddleInitialBlur() {
+    const value = this.form.controls['middleInitial'].value || '';
+    if (value) {
+      this.form.controls['middleInitial'].setValue(value.toUpperCase());
+    }
+  }
+
   onStateInput(event: Event) {
     const input = event.target as HTMLInputElement;
     const up = (input.value || '').toUpperCase().slice(0, 2);

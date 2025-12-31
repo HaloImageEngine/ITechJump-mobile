@@ -35,6 +35,7 @@
             formControlName="firstName"
             autocomplete="given-name"
             (input)="onFirstNameInput($event)"
+            (blur)="onFirstNameBlur()"
           />
           <mat-hint>Letters only</mat-hint>
           <mat-error *ngIf="f['firstName'].touched && f['firstName'].invalid">
@@ -51,6 +52,7 @@
             autocomplete="additional-name"
             maxlength="1"
             (input)="onMiddleInitialInput($event)"
+            (blur)="onMiddleInitialBlur()"
           />
           <mat-error *ngIf="f['middleInitial'].touched && f['middleInitial'].invalid">
             M.I. must be a single letter.
@@ -64,6 +66,7 @@
             formControlName="lastName"
             autocomplete="family-name"
             (input)="onLastNameInput($event)"
+            (blur)="onLastNameBlur()"
           />
           <mat-hint>Letters only</mat-hint>
           <mat-error *ngIf="f['lastName'].touched && f['lastName'].invalid">
